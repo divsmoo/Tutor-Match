@@ -1,0 +1,114 @@
+version: "3.8"
+
+# ─────────────────────────────────────────────────────────────
+# ESD G7T1 — Tutor Matching Platform
+# Supabase (PostgreSQL) is hosted remotely — no local DB needed
+# ─────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Message Broker ──────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"     # AMQP — Flask services connect here
+      - "15672:15672"   # Management UI → http://localhost:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Atomic Services ─────────────────────────────────────────
+  tutor:
+    build: ./services/tutor
+    container_name: tutor
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  student:
+    build: ./services/student
+    container_name: student
+    ports:
+      - "5002:5002"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  interest:
+    build: ./services/interest
+    container_name: interest
+    ports:
+      - "5003:5003"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  booking:
+    build: ./services/booking
+    container_name: booking
+    ports:
+      - "5004:5004"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  payment:
+    build: ./services/payment
+    container_name: payment
+    ports:
+      - "5005:5005"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  notification:
+    build: ./services/notification
+    container_name: notification
+    ports:
+      - "5006:5006"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  # ── Composite Services ───────────────────────────────────────
+  indicate-interest:
+    build: ./services/indicate-interest
+    container_name: indicate-interest
+    ports:
+      - "5010:5010"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      tutor:
+        condition: service_started
+      interest:
+        condition: service_started
+    restart: on-failure
