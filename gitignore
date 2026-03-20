@@ -1,0 +1,91 @@
+# ─────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+ENV/
+
+# ─────────────────────────────────────────────
+# Environment variables & secrets
+# ─────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.json
+
+# ─────────────────────────────────────────────
+# Docker
+# ─────────────────────────────────────────────
+*.log
+docker-compose.override.yml
+
+# ─────────────────────────────────────────────
+# Node / Frontend (OutSystems exports, any JS tooling)
+# ─────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+dist/
+.cache/
+
+# ─────────────────────────────────────────────
+# Database
+# ─────────────────────────────────────────────
+*.sqlite3
+*.db
+
+# ─────────────────────────────────────────────
+# IDEs & editors
+# ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─────────────────────────────────────────────
+# pytest / coverage
+# ─────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ─────────────────────────────────────────────
+# Jupyter (if anyone uses notebooks)
+# ─────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─────────────────────────────────────────────
+# RabbitMQ / broker local data
+# ─────────────────────────────────────────────
+rabbitmq_data/
+mnesia/
