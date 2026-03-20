@@ -15,6 +15,7 @@ A microservices-based platform that connects students directly with tutors, redu
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
+- [Branching Strategy](#branching-strategy)
 - [Team](#team)
 
 ---
@@ -27,33 +28,31 @@ Tuition costs in Singapore are rising due to high demand and a fragmented market
 
 ## Solution Overview
 
-**Tutor Matching Platform** allows students to browse tutors, indicate interest, coordinate trial lesson bookings, and make payments — all in one place. Tutors receive automated notifications and can manage their availability. The platform uses event-driven microservices so each step happens reliably and asynchronously.
+**Tutor Matching Platform** allows students to browse tutors, indicate interest, coordinate trial lesson bookings, and make payments — all in one place. Tutors receive automated notifications and can manage their availability.
 
 ---
 
 ## Architecture
 
-The system is built on a microservices architecture using:
-
-- **Synchronous HTTP (REST)** for direct service-to-service calls where an immediate response is needed
-- **Asynchronous messaging (AMQP via RabbitMQ)** for event-driven flows like notifications and booking coordination
-- **Orchestration** in the Booking service (coordinates payment flow)
-- **Choreography** in the Interest acceptance flow (services react independently to RabbitMQ events)
-- **KONG API Gateway** as the single entry point for all client requests
+- **Synchronous HTTP (REST)** — direct service-to-service calls where an immediate response is needed
+- **Asynchronous messaging (AMQP via RabbitMQ)** — event-driven flows like notifications and booking coordination
+- **Orchestration** — Booking service coordinates the payment flow
+- **Choreography** — Services react independently to RabbitMQ events in the interest acceptance flow
+- **KONG API Gateway** — single entry point for all client requests
 
 ---
 
 ## Microservices
 
-| Service | Type | Responsibility |
-|---|---|---|
-| `tutor` | Atomic | Stores and serves tutor profiles |
-| `student` | Atomic | Stores and serves student profiles |
-| `interest` | Atomic | Manages interest requests (PENDING / ACCEPTED / EXPIRED) |
-| `booking` | Atomic + Orchestrator | Manages lesson bookings and orchestrates payment |
-| `payment` | Atomic | Processes payments via mock payment gateway |
-| `notification` | Atomic | Consumes RabbitMQ events and sends email/SMS alerts |
-| `indicate-interest` | Composite | Handles Scenario 1 — student selects a tutor |
+| Service | Type | Port | Responsibility |
+|---|---|---|---|
+| `tutor` | Atomic | 5001 | Stores and serves tutor profiles |
+| `student` | Atomic | 5002 | Stores and serves student profiles |
+| `interest` | Atomic | 5003 | Manages interest requests (PENDING / ACCEPTED / EXPIRED) |
+| `booking` | Atomic + Orchestrator | 5004 | Manages lesson bookings and orchestrates payment |
+| `payment` | Atomic | 5005 | Processes payments via mock payment gateway |
+| `notification` | Atomic | 5006 | Consumes RabbitMQ events and sends email/SMS |
+| `indicate-interest` | Composite | 5010 | Handles Scenario 1 — student selects a tutor |
 
 ---
 
@@ -66,11 +65,7 @@ Student browses tutors → selects one → composite service saves a PENDING int
 Tutor reviews pending requests → accepts a student and proposes dates → Interest service publishes `InterestAccepted` to RabbitMQ → Booking service creates a `PENDING_STUDENT_CONFIRMATION` record → Notification service emails the student to select a date.
 
 ### Scenario 3 — Booking Confirmation and Payment (Orchestration)
-Student views proposed dates → selects a date → Booking service locks the slot as `PENDING_PAYMENT` → orchestrates a synchronous call to Payment service → mock payment gateway processes the transaction → on success, Booking service sets status to `CONFIRMED` and publishes `LessonConfirmed` → Notification service sends calendar invites to both parties.
-
-**Cancellation paths:**
-- Student cancels → Booking service frees slot → publishes `TrialCancelled` → tutor is notified
-- Tutor cancels after confirmation → student is notified and refund is issued
+Student views proposed dates → selects a date → Booking service locks the slot as `PENDING_PAYMENT` → orchestrates a synchronous call to Payment service → mock payment gateway processes the transaction → on success, Booking publishes `LessonConfirmed` → Notification service sends calendar invites to both parties.
 
 ---
 
@@ -83,7 +78,7 @@ Student views proposed dates → selects a date → Booking service locks the sl
 | API Gateway | KONG |
 | Frontend / UI | OutSystems |
 | Containerisation | Docker + Docker Compose |
-| Database | PostgreSQL (one DB per service) |
+| Database | Supabase (hosted PostgreSQL) |
 | External APIs | Mock Payment Gateway, SMTP Email |
 
 ---
@@ -93,47 +88,47 @@ Student views proposed dates → selects a date → Booking service locks the sl
 ```
 esd-g7t1/
 ├── services/
-│   ├── tutor/                  # Atomic — tutor profiles
+│   ├── tutor/
 │   │   ├── tutor.py
 │   │   ├── requirements.txt
 │   │   └── Dockerfile
-│   ├── student/                # Atomic — student profiles
+│   ├── student/
 │   │   ├── student.py
 │   │   ├── requirements.txt
 │   │   └── Dockerfile
-│   ├── interest/               # Atomic — interest records
+│   ├── interest/
 │   │   ├── interest.py
 │   │   ├── requirements.txt
 │   │   └── Dockerfile
-│   ├── booking/                # Atomic + Orchestrator
+│   ├── booking/
 │   │   ├── booking.py
 │   │   ├── requirements.txt
 │   │   └── Dockerfile
-│   ├── payment/                # Atomic — payment processing
+│   ├── payment/
 │   │   ├── payment.py
 │   │   ├── requirements.txt
 │   │   └── Dockerfile
-│   ├── notification/           # Atomic — email/SMS via RabbitMQ
+│   ├── notification/
 │   │   ├── notification.py
 │   │   ├── requirements.txt
 │   │   └── Dockerfile
-│   └── indicate-interest/      # Composite — Scenario 1
+│   └── indicate-interest/
 │       ├── indicate_interest.py
 │       ├── requirements.txt
 │       └── Dockerfile
-├── diagrams/                   # .drawio scenario diagrams
+├── diagrams/
 │   ├── scenario1.drawio
 │   ├── scenario2a.drawio
 │   ├── scenario2b.drawio
 │   ├── scenario2c.drawio
 │   ├── scenario3a.drawio
 │   └── scenario3b.drawio
-├── docs/                       # Report, proposal, and supporting docs
+├── docs/
 │   ├── ESD_G7T1_Proposal.pptx
 │   └── ESD_G7T1_Report.docx
-├── docker-compose.yml          # Orchestrates all services + RabbitMQ
+├── docker-compose.yml
 ├── .gitignore
-├── .env.example                # Copy to .env and fill in your values
+├── .env.example
 └── README.md
 ```
 
@@ -142,8 +137,6 @@ esd-g7t1/
 ## Getting Started
 
 ### Prerequisites
-
-Make sure you have installed:
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Git](https://git-scm.com/)
 
@@ -167,28 +160,29 @@ cp .env.example .env
 docker-compose up --build
 ```
 
-This will spin up RabbitMQ and all microservices together. Each service runs on its own port as defined in `docker-compose.yml`.
-
 ### 4. Stop all services
 
 ```bash
 docker-compose down
 ```
 
+### 5. Check RabbitMQ dashboard
+
+Open [http://localhost:15672](http://localhost:15672) in your browser. Login with `guest / guest`.
+
 ---
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in your values. **Never commit the `.env` file** — it is already in `.gitignore`.
-
-Key variables you need to configure:
+Copy `.env.example` to `.env` and fill in your values. **Never commit `.env`** — it is in `.gitignore`.
 
 | Variable | Description |
 |---|---|
-| `RABBITMQ_HOST` | Hostname for RabbitMQ (use `rabbitmq` inside Docker) |
-| `PAYMENT_GATEWAY_API_KEY` | Sandbox API key for the mock payment gateway |
-| `SMTP_USER` / `SMTP_PASS` | Gmail credentials for the notification service |
-| `*_DB_URL` | PostgreSQL connection string per service |
+| `SUPABASE_URL` | Your Supabase project URL |
+| `SUPABASE_KEY` | Your Supabase anon/public key |
+| `RABBITMQ_HOST` | Use `rabbitmq` inside Docker, `localhost` outside |
+| `PAYMENT_GATEWAY_API_KEY` | Sandbox key for mock payment gateway |
+| `SMTP_USER` / `SMTP_PASS` | Gmail credentials for notification service |
 
 ---
 
@@ -196,21 +190,21 @@ Key variables you need to configure:
 
 | Branch | Purpose |
 |---|---|
-| `main` | Production-ready code only. Requires PR + approval to merge. |
+| `main` | Production-ready. Requires PR + 1 approval to merge. |
 | `dev` | Integration branch. All features merge here first via PR. |
 | `feature/<name>` | Your working branch. Branch off `dev`, PR back to `dev`. |
 
 **Never commit directly to `main` or `dev`.**
 
 ```bash
-# Starting a new feature
+# Start a new feature
 git checkout dev
 git pull origin dev
 git checkout -b feature/your-service-name
 
 # When done
 git push -u origin feature/your-service-name
-# Then open a Pull Request on GitHub: feature/your-name → dev
+# Open a PR on GitHub: feature/your-name → dev
 ```
 
 ---
@@ -219,9 +213,10 @@ git push -u origin feature/your-service-name
 
 | Name | Role |
 |---|---|
-| Ewen| Service: Tutor + Student |
-| Dexter| Service: Interest + Indicate Interest composite |
-| Zhi Xuan | Service: Booking + Payment |
-| Jia Le | Service: Notification + RabbitMQ setup |
-| Sef | OutSystems UI + KONG API Gateway |
-| Divyesh | GitHub PIC + Docker Compose + DevOps |
+| TBC | Service: Tutor |
+| TBC | Service: Student |
+| TBC | Service: Interest |
+| TBC | Service: Booking + Payment |
+| TBC | Service: Notification |
+| TBC | Service: Indicate Interest (Composite) |
+| TBC | GitHub PIC + Docker Compose + DevOps |
