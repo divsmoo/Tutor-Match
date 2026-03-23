@@ -95,6 +95,18 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: on-failure
+  
+  credit:
+    build: ./services/credit
+    container_name: credit
+    ports:
+      - "5007:5007"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
 
   # ── Composite Services ───────────────────────────────────────
   indicate-interest:
