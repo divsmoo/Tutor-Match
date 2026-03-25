@@ -77,7 +77,7 @@ def create_interest():
 def update_interest(interest_id):
     try:
         data = request.get_json()
-        response = supabase.table("interest").update(data).eq("id", interest_id).execute()
+        response = supabase.table("interest").update(data).eq("interest_id", interest_id).execute()
         if not response.data:
             return jsonify({"error": "Interest record not found"}), 404
         return jsonify({"data": response.data[0]}), 200
