@@ -68,7 +68,7 @@ def update_student(student_id):
         return jsonify({"error": str(e)}), 500
 
 
-# ── DELETE a student ──────────────────────────
+# DELETE a student
 @app.route("/student/<int:student_id>", methods=["DELETE"])
 def delete_student(student_id):
     try:
