@@ -63,7 +63,7 @@ def indicate_interest():
         if tutor_response.status_code != 200:
             return jsonify({"error": "Tutor not found"}), 404
         tutor = tutor_response.json()["data"]
-        tutor_email = tutor.get("email")
+        tutor_email = tutor.get("contact_info")
 
         # Step 2 — Save PENDING interest record in Interest service
         interest_payload = {"student_id": student_id, "tutor_id": tutor_id}
@@ -75,7 +75,7 @@ def indicate_interest():
         # Step 3 — Publish InterestCreated event to RabbitMQ
         # Notification service will pick this up and email the tutor
         publish_event("InterestCreated", {
-            "interest_id": interest["id"],
+            "interest_id": interest["interest_id"],
             "tutor_id": tutor_id,
             "tutor_email": tutor_email,
             "student_id": student_id,
@@ -84,7 +84,7 @@ def indicate_interest():
 
         return jsonify({
             "message": "Interest indicated successfully. Tutor will be notified.",
-            "interest_id": interest["id"]
+            "interest_id": interest["interest_id"]
         }), 201
 
     except Exception as e:
