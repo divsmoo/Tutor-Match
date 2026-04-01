@@ -130,6 +130,9 @@ services:
     container_name: get-interested-students
     ports:
       - "5011:5011"
+    environment:
+      - INTEREST_SERVICE_URL=http://interest:5003
+      - STUDENT_SERVICE_URL=http://student:5002
     env_file:
       - .env
     depends_on:
