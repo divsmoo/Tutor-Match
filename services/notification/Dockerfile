@@ -9,10 +9,6 @@ COPY . .
 
 EXPOSE 5006
 
-<<<<<<< Updated upstream
-CMD ["python", "app.py"]
-=======
 ENV PYTHONUNBUFFERED=1
 
 CMD ["python", "notification.py"]
->>>>>>> Stashed changes
