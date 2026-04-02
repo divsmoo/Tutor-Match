@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 5010
 
-CMD ["python", "indicate-interest.py"]
+CMD ["python", "indicate_interest.py"]
