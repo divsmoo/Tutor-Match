@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from datetime import datetime, timezone, timedelta
+import threading
+import time
 import os
 
 load_dotenv()
@@ -22,6 +25,29 @@ STATUS_EXPIRED = "EXPIRED"
 STATUS_CANCELLED = "CANCELLED"
 
 
+# ── Auto-expiry background job ────────────────
+# Runs every hour, sets PENDING interests older than 48hrs to EXPIRED
+def expire_old_interests():
+    while True:
+        try:
+            cutoff = (datetime.now(timezone.utc) - timedelta(hours=48)).isoformat()
+            response = (
+                supabase.table("interest")
+                .select("interest_id")
+                .eq("status", STATUS_PENDING)
+                .lt("created", cutoff)
+                .execute()
+            )
+            if response.data:
+                ids = [r["interest_id"] for r in response.data]
+                for interest_id in ids:
+                    supabase.table("interest").update({"status": STATUS_EXPIRED}).eq("interest_id", interest_id).execute()
+                print(f"[interest] Expired {len(ids)} interest(s)")
+        except Exception as e:
+            print(f"[interest] Auto-expiry error: {e}")
+        time.sleep(3600)  # run every hour
+
+
 # ── Health check ─────────────────────────────
 @app.route("/health", methods=["GET"])
 def health():
@@ -38,12 +64,30 @@ def get_all_interests():
         return jsonify({"error": str(e)}), 500
 
 
-# ── GET interests by tutor ID ─────────────────
+# ── GET interests by tutor ID (full records) ──
 @app.route("/interest/tutor/<int:tutor_id>", methods=["GET"])
 def get_by_tutor(tutor_id):
     try:
         response = supabase.table("interest").select("*").eq("tutor_id", tutor_id).execute()
         return jsonify({"data": response.data}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ── GET student IDs by tutor ID (for get-interested-students composite) ──
+# Returns only a list of student_ids with PENDING status
+@app.route("/interest/tutor/<int:tutor_id>/students", methods=["GET"])
+def get_student_ids_by_tutor(tutor_id):
+    try:
+        response = (
+            supabase.table("interest")
+            .select("student_id")
+            .eq("tutor_id", tutor_id)
+            .eq("status", STATUS_PENDING)
+            .execute()
+        )
+        student_ids = [r["student_id"] for r in response.data]
+        return jsonify({"tutor_id": tutor_id, "student_ids": student_ids}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -58,12 +102,27 @@ def get_by_student(student_id):
         return jsonify({"error": str(e)}), 500
 
 
+# ── GET one interest record by ID ─────────────
+# Must be last among GET routes to avoid conflict with /tutor/ and /student/
+@app.route("/interest/<int:interest_id>", methods=["GET"])
+def get_interest(interest_id):
+    try:
+        response = supabase.table("interest").select("*").eq("interest_id", interest_id).execute()
+        if not response.data:
+            return jsonify({"error": "Interest record not found"}), 404
+        return jsonify({"data": response.data[0]}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # ── POST create an interest record ───────────
 # Expected body: { "student_id": 1, "tutor_id": 2 }
 @app.route("/interest", methods=["POST"])
 def create_interest():
     try:
         data = request.get_json()
+        if not data.get("student_id") or not data.get("tutor_id"):
+            return jsonify({"error": "Missing required fields: student_id, tutor_id"}), 400
         data["status"] = STATUS_PENDING  # always starts as PENDING
         response = supabase.table("interest").insert(data).execute()
         return jsonify({"data": response.data}), 201
@@ -72,12 +131,12 @@ def create_interest():
 
 
 # ── PUT update interest status ────────────────
-# Expected body: { "status": "ACCEPTED", "proposed_dates": [...] }
+# Expected body: { "status": "ACCEPTED" }
 @app.route("/interest/<int:interest_id>", methods=["PUT"])
 def update_interest(interest_id):
     try:
         data = request.get_json()
-        response = supabase.table("interest").update(data).eq("id", interest_id).execute()
+        response = supabase.table("interest").update(data).eq("interest_id", interest_id).execute()
         if not response.data:
             return jsonify({"error": "Interest record not found"}), 404
         return jsonify({"data": response.data[0]}), 200
@@ -85,5 +144,23 @@ def update_interest(interest_id):
         return jsonify({"error": str(e)}), 500
 
 
+# ── DELETE an interest record ─────────────────
+@app.route("/interest/<int:interest_id>", methods=["DELETE"])
+def delete_interest(interest_id):
+    try:
+        response = supabase.table("interest").select("*").eq("interest_id", interest_id).execute()
+        if not response.data:
+            return jsonify({"error": "Interest record not found"}), 404
+        supabase.table("interest").delete().eq("interest_id", interest_id).execute()
+        return jsonify({"message": "Interest record deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ─────────────────────────────────────────────
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=PORT, debug=True)
+    # Start auto-expiry job in background thread
+    expiry_thread = threading.Thread(target=expire_old_interests, daemon=True)
+    expiry_thread.start()
+
+    app.run(host="0.0.0.0", port=PORT, debug=True, use_reloader=False)
