@@ -16,13 +16,13 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 PORT = 5001
 
 
-# ── Health check ─────────────────────────────
+# health check
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"service": "tutor", "status": "running"}), 200
 
 
-# ── GET all tutors ────────────────────────────
+# GET all tutors
 @app.route("/tutor", methods=["GET"])
 def get_all_tutors():
     try:
@@ -32,11 +32,11 @@ def get_all_tutors():
         return jsonify({"error": str(e)}), 500
 
 
-# ── GET one tutor by ID ───────────────────────
+# GET one tutor by ID 
 @app.route("/tutor/<int:tutor_id>", methods=["GET"])
 def get_tutor(tutor_id):
     try:
-        response = supabase.table("tutor").select("*").eq("id", tutor_id).execute()
+        response = supabase.table("tutor").select("*").eq("tutor_id", tutor_id).execute()
         if not response.data:
             return jsonify({"error": "Tutor not found"}), 404
         return jsonify({"data": response.data[0]}), 200
@@ -44,7 +44,7 @@ def get_tutor(tutor_id):
         return jsonify({"error": str(e)}), 500
 
 
-# ── POST create a tutor ───────────────────────
+# POST create a tutor
 @app.route("/tutor", methods=["POST"])
 def create_tutor():
     try:
@@ -55,12 +55,12 @@ def create_tutor():
         return jsonify({"error": str(e)}), 500
 
 
-# ── PUT update a tutor ────────────────────────
+# PUT update a tutor
 @app.route("/tutor/<int:tutor_id>", methods=["PUT"])
 def update_tutor(tutor_id):
     try:
         data = request.get_json()
-        response = supabase.table("tutor").update(data).eq("id", tutor_id).execute()
+        response = supabase.table("tutor").update(data).eq("tutor_id", tutor_id).execute()
         if not response.data:
             return jsonify({"error": "Tutor not found"}), 404
         return jsonify({"data": response.data[0]}), 200
@@ -68,11 +68,11 @@ def update_tutor(tutor_id):
         return jsonify({"error": str(e)}), 500
 
 
-# ── DELETE a tutor ────────────────────────────
+# DELETE a tutor
 @app.route("/tutor/<int:tutor_id>", methods=["DELETE"])
 def delete_tutor(tutor_id):
     try:
-        supabase.table("tutor").delete().eq("id", tutor_id).execute()
+        supabase.table("tutor").delete().eq("tutor_id", tutor_id).execute()
         return jsonify({"message": "Tutor deleted"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
