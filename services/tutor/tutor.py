@@ -36,7 +36,7 @@ def get_all_tutors():
 @app.route("/tutor/<int:tutor_id>", methods=["GET"])
 def get_tutor(tutor_id):
     try:
-        response = supabase.table("tutor").select("*").eq("id", tutor_id).execute()
+        response = supabase.table("tutor").select("*").eq("tutor_id", tutor_id).execute()
         if not response.data:
             return jsonify({"error": "Tutor not found"}), 404
         return jsonify({"data": response.data[0]}), 200
