@@ -1,106 +1,134 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from supabase import create_client, Client
-from dotenv import load_dotenv
-import requests as http
-import os
-
-load_dotenv()
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+# Supabase Config
+SUPABASE_URL = "https://effbychudvpmpjafxrfr.supabase.co"
+SUPABASE_KEY = "sb_publishable_S8AkmmMOyTanEqnt7zI9oQ_uCk92qYK"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-PORT = 5004
+VALID_STATUSES = ['CONFIRMED', 'USER_CANCELLED', 'TUTOR_CANCELLED']
 
-# Booking status values
-STATUS_PENDING_STUDENT = "PENDING_STUDENT_CONFIRMATION"
-STATUS_PENDING_PAYMENT = "PENDING_PAYMENT"
-STATUS_CONFIRMED = "CONFIRMED"
-STATUS_CANCELLED = "CANCELLED"
-
-# URL of the payment service (via Docker service name)
-PAYMENT_SERVICE_URL = "http://payment:5005"
-
-
-# ── Health check ─────────────────────────────
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"service": "booking", "status": "running"}), 200
-
-
-# ── GET all bookings ──────────────────────────
-@app.route("/booking", methods=["GET"])
-def get_all_bookings():
+# -----------------------------------------------
+# GET all trials
+# -----------------------------------------------
+@app.route("/trials", methods=['GET'])
+def get_all_trials():
     try:
-        response = supabase.table("booking").select("*").execute()
-        return jsonify({"data": response.data}), 200
+        response = supabase.table('trials').select('*').execute()
+
+        return jsonify({
+            "code": 200,
+            "data": response.data
+        }), 200
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "code": 500,
+            "message": f"An error occurred: {str(e)}"
+        }), 500
 
 
-# ── GET one booking by ID ─────────────────────
-@app.route("/booking/<int:booking_id>", methods=["GET"])
-def get_booking(booking_id):
-    try:
-        response = supabase.table("booking").select("*").eq("id", booking_id).execute()
-        if not response.data:
-            return jsonify({"error": "Booking not found"}), 404
-        return jsonify({"data": response.data[0]}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# ── POST create a booking (after student selects a date) ─────
-# Expected body: { "interest_id": 1, "student_id": 1, "tutor_id": 2, "selected_date": "2025-04-01" }
-# This also orchestrates the payment call
-@app.route("/booking", methods=["POST"])
-def create_booking():
+# -----------------------------------------------
+# POST create a new trial
+# -----------------------------------------------
+@app.route("/trials", methods=['POST'])
+def create_trial():
     try:
         data = request.get_json()
-        data["status"] = STATUS_PENDING_PAYMENT
 
-        # Step 1 — Save booking as PENDING_PAYMENT
-        booking_response = supabase.table("booking").insert(data).execute()
-        booking = booking_response.data[0]
+        # Validate required fields
+        required_fields = ['student_id', 'tutor_id', 'trial_date', 'start_time', 'end_time']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    "code": 400,
+                    "message": f"Missing required field: {field}"
+                }), 400
 
-        # Step 2 — Orchestrate: call Payment service synchronously
-        payment_payload = {
-            "booking_id": booking["id"],
-            "student_id": data["student_id"],
-            "amount": data.get("amount", 0)
+        trial_data = {
+            'student_id': data['student_id'],
+            'tutor_id': data['tutor_id'],
+            'trial_date': data['trial_date'],
+            'start_time': data['start_time'],
+            'end_time': data['end_time'],
+            'subject': data.get('subject', ''),
+            'notes': data.get('notes', ''),
+            'status': 'PENDING',
+            'created_at': datetime.now().isoformat()
         }
-        payment_response = http.post(f"{PAYMENT_SERVICE_URL}/payment", json=payment_payload)
 
-        if payment_response.status_code != 201:
-            # Payment failed — update booking to CANCELLED
-            supabase.table("booking").update({"status": STATUS_CANCELLED}).eq("id", booking["id"]).execute()
-            return jsonify({"error": "Payment failed", "details": payment_response.json()}), 400
+        response = supabase.table('trials').insert(trial_data).execute()
 
-        # Step 3 — Payment succeeded — update booking to CONFIRMED
-        supabase.table("booking").update({"status": STATUS_CONFIRMED}).eq("id", booking["id"]).execute()
-        return jsonify({"message": "Booking confirmed", "booking_id": booking["id"]}), 201
+        return jsonify({
+            "code": 201,
+            "message": "Trial created successfully",
+            "data": response.data[0]
+        }), 201
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "code": 500,
+            "message": f"An error occurred: {str(e)}"
+        }), 500
 
 
-# ── PUT update booking status ─────────────────
-# e.g. for cancellations: { "status": "CANCELLED" }
-@app.route("/booking/<int:booking_id>", methods=["PUT"])
-def update_booking(booking_id):
+# -----------------------------------------------
+# PUT update trial status
+# -----------------------------------------------
+@app.route("/trials/<int:trial_id>", methods=['PUT'])
+def update_trial_status(trial_id):
     try:
         data = request.get_json()
-        response = supabase.table("booking").update(data).eq("id", booking_id).execute()
-        if not response.data:
-            return jsonify({"error": "Booking not found"}), 404
-        return jsonify({"data": response.data[0]}), 200
+
+        # Validate status field exists
+        if 'status' not in data:
+            return jsonify({
+                "code": 400,
+                "message": "Missing required field: status"
+            }), 400
+
+        # Validate status value
+        if data['status'] not in VALID_STATUSES:
+            return jsonify({
+                "code": 400,
+                "message": f"Invalid status. Must be one of: {', '.join(VALID_STATUSES)}"
+            }), 400
+
+        # Check if trial exists
+        existing = supabase.table('trials').select('*').eq('trial_id', trial_id).execute()
+        if len(existing.data) == 0:
+            return jsonify({
+                "code": 404,
+                "message": f"Trial {trial_id} not found"
+            }), 404
+
+        # Update trial status
+        update_data = {
+            'status': data['status'],
+            'updated_at': datetime.now().isoformat()
+        }
+
+        response = supabase.table('trials').update(update_data).eq('trial_id', trial_id).execute()
+
+        return jsonify({
+            "code": 200,
+            "message": f"Trial {trial_id} status updated to {data['status']}",
+            "data": response.data[0]
+        }), 200
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "code": 500,
+            "message": f"An error occurred: {str(e)}"
+        }), 500
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=PORT, debug=True)
+    app.run(host="0.0.0.0", port=5007, debug=True)
+
+
