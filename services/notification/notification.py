@@ -91,27 +91,30 @@ def on_trial_cancelled(ch, method, properties, body):
 
 def start_consuming():
     """Start listening to all RabbitMQ queues in a background thread"""
-    try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
-        channel = connection.channel()
+    import time
+    while True:
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+            channel = connection.channel()
 
-        # Declare queues (safe to call even if they already exist)
-        queues = {
-            "InterestCreated": on_interest_created,
-            "InterestAccepted": on_interest_accepted,
-            "LessonConfirmed": on_lesson_confirmed,
-            "TrialCancelled": on_trial_cancelled,
-        }
+            # Declare queues (safe to call even if they already exist)
+            queues = {
+                "InterestCreated": on_interest_created,
+                "InterestAccepted": on_interest_accepted,
+                "LessonConfirmed": on_lesson_confirmed,
+                "TrialCancelled": on_trial_cancelled,
+            }
 
-        for queue_name, callback in queues.items():
-            channel.queue_declare(queue=queue_name, durable=True)
-            channel.basic_consume(queue=queue_name, on_message_callback=callback)
+            for queue_name, callback in queues.items():
+                channel.queue_declare(queue=queue_name, durable=True)
+                channel.basic_consume(queue=queue_name, on_message_callback=callback)
 
-        print("[Notification] Listening for events...")
-        channel.start_consuming()
+            print("[Notification] Listening for events...")
+            channel.start_consuming()
 
-    except Exception as e:
-        print(f"[Notification] RabbitMQ connection error: {e}")
+        except Exception as e:
+            print(f"[Notification] RabbitMQ connection error: {e}. Retrying in 5s...")
+            time.sleep(5)
 
 
 # ── Health check ─────────────────────────────

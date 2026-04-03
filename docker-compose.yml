@@ -21,7 +21,8 @@ services:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 15
+      start_period: 60s
 
   # ── Atomic Services ─────────────────────────────────────────
   tutor:
