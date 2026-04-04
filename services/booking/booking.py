@@ -11,7 +11,7 @@ SUPABASE_URL = "https://effbychudvpmpjafxrfr.supabase.co"
 SUPABASE_KEY = "sb_publishable_S8AkmmMOyTanEqnt7zI9oQ_uCk92qYK"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-VALID_STATUSES = ['CONFIRMED', 'USER_CANCELLED', 'TUTOR_CANCELLED']
+VALID_STATUSES = ['CONFIRMED', 'USER_CANCELLED', 'TUTOR_CANCELLED', 'COMPLETED']
 
 # -----------------------------------------------
 # GET all trials
@@ -129,6 +129,6 @@ def update_trial_status(trial_id):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5007, debug=True)
+    app.run(host="0.0.0.0", port=5004, debug=True)
 
 

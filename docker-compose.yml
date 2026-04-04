@@ -129,6 +129,25 @@ services:
         condition: service_started
     restart: on-failure
 
+  continue-lessons:
+    build: ./services/continue-lessons
+    container_name: continue-lessons
+    ports:
+      - "5014:5014"
+    environment:
+      - BOOKING_SERVICE_URL=http://booking:5004
+      - TUTOR_SERVICE_URL=http://tutor:5001
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      booking:
+        condition: service_started
+      tutor:
+        condition: service_started
+    restart: on-failure
+
   get-interested-students:
     build: ./services/get-interested-students
     container_name: get-interested-students

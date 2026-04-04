@@ -81,6 +81,19 @@ def on_lesson_confirmed(ch, method, properties, body):
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
+def on_lesson_continued(ch, method, properties, body):
+    """Scenario 2c — Notify tutor when student opts to continue lessons"""
+    data = json.loads(body)
+    tutor_email = data.get("tutor_email")
+    tutor_name = data.get("tutor_name")
+    send_email(
+        to_address=tutor_email,
+        subject="A Student Wants to Continue Lessons",
+        body=f"Hi {tutor_name}, a student has opted to continue lessons with you. Please log in to arrange further sessions."
+    )
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+
 def on_trial_cancelled(ch, method, properties, body):
     """Notify tutor when student cancels"""
     data = json.loads(body)
@@ -103,6 +116,7 @@ def start_consuming():
                 "InterestAccepted": on_interest_accepted,
                 "LessonConfirmed": on_lesson_confirmed,
                 "TrialCancelled": on_trial_cancelled,
+                "LessonContinued": on_lesson_continued,
             }
 
             for queue_name, callback in queues.items():
