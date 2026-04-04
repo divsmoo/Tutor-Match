@@ -24,7 +24,8 @@ services:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 15
+      start_period: 60s
 
   # ── Atomic Services ─────────────────────────────────────────
   tutor:
@@ -125,6 +126,25 @@ services:
       tutor:
         condition: service_started
       interest:
+        condition: service_started
+    restart: on-failure
+
+  continue-lessons:
+    build: ./services/continue-lessons
+    container_name: continue-lessons
+    ports:
+      - "5014:5014"
+    environment:
+      - BOOKING_SERVICE_URL=http://booking:5004
+      - TUTOR_SERVICE_URL=http://tutor:5001
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      booking:
+        condition: service_started
+      tutor:
         condition: service_started
     restart: on-failure
 
