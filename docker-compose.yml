@@ -167,6 +167,25 @@ services:
         condition: service_started
     restart: on-failure
 
+  accept-student:
+    build: ./services/accept-student
+    container_name: accept-student
+    ports:
+      - "5012:5012"
+    environment:
+      - INTEREST_SERVICE_URL=http://interest:5003
+      - BOOKING_SERVICE_URL=http://booking:5004
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      interest:
+        condition: service_started
+      booking:
+        condition: service_started
+    restart: on-failure
+
   #######################################
   # Postgres: The database used by Kong
   #######################################
