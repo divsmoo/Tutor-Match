@@ -95,6 +95,18 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: on-failure
+  
+  credit:
+    build: ./services/credit
+    container_name: credit
+    ports:
+      - "5007:5007"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
 
   # ── Composite Services ───────────────────────────────────────
   indicate-interest:
@@ -102,6 +114,25 @@ services:
     container_name: indicate-interest
     ports:
       - "5010:5010"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      tutor:
+        condition: service_started
+      interest:
+        condition: service_started
+    restart: on-failure
+
+  get-interested-students:
+    build: ./services/get-interested-students
+    container_name: get-interested-students
+    ports:
+      - "5011:5011"
+    environment:
+      - INTEREST_SERVICE_URL=http://interest:5003
+      - STUDENT_SERVICE_URL=http://student:5002
     env_file:
       - .env
     depends_on:

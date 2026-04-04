@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 5005
 
-CMD ["python", "app.py"]
+CMD ["python", "payment.py"]

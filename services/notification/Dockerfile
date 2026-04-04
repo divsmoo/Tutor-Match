@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 5006
 
-CMD ["python", "app.py"]
+CMD ["python", "notification.py"]
