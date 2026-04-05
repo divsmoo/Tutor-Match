@@ -1,23 +1,47 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
+import pika
+import json
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Atomic microservice URLs
-TRIALS_URL = "http://127.0.0.1:5007/trials"
+TRIALS_URL = os.environ.get("TRIALS_SERVICE_URL", "http://127.0.0.1:5007")
+CREDIT_URL = os.environ.get("CREDIT_SERVICE_URL", "http://127.0.0.1:5008")
+STUDENT_URL = os.environ.get("STUDENT_SERVICE_URL", "http://127.0.0.1:5002")
+TUTOR_URL = os.environ.get("TUTOR_SERVICE_URL", "http://127.0.0.1:5001")
+RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "localhost")
 
-# -----------------------------------------------
-# POST /cancel-trial/<trial_id>
-# Composite service to cancel a trial booking
-# -----------------------------------------------
+def publish_trial_cancelled(student_email, tutor_email, cancelled_by):
+    """Publish TrialCancelled event to RabbitMQ"""
+    try:
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=RABBITMQ_HOST)
+        )
+        channel = connection.channel()
+        channel.queue_declare(queue="TrialCancelled", durable=True)
+        channel.basic_publish(
+            exchange="",
+            routing_key="TrialCancelled",
+            body=json.dumps({
+                "student_email": student_email,
+                "tutor_email": tutor_email,
+                "cancelled_by": cancelled_by
+            }),
+            properties=pika.BasicProperties(delivery_mode=2)
+        )
+        connection.close()
+        print(f"[cancel_trial_lessons] Published TrialCancelled event")
+    except Exception as e:
+        print(f"[cancel_trial_lessons] RabbitMQ error: {e}")
+
 @app.route("/cancel-trial/<int:trial_id>", methods=['POST'])
 def cancel_trial(trial_id):
     try:
         data = request.get_json()
 
-        # Validate who is cancelling
         if 'cancelled_by' not in data:
             return jsonify({
                 "code": 400,
@@ -33,18 +57,17 @@ def cancel_trial(trial_id):
         else:
             return jsonify({
                 "code": 400,
-                "message": "cancelled_by must be either STUDENT or TUTOR"
+                "message": "cancelled_by must be STUDENT or TUTOR"
             }), 400
 
-        # Step 1: Update trial status via TrialsDB
+        # Step 1 — Update trial status
+        print(f"[cancel_trial_lessons] Updating trial {trial_id} to {new_status}")
         trial_response = requests.put(
-            f"{TRIALS_URL}/{trial_id}",
-            json={"status": new_status}
+            f"{TRIALS_URL}/trials/{trial_id}",
+            json={"status": new_status},
+            headers={"Content-Type": "application/json"}
         )
 
-        trial_result = trial_response.json()
-
-        # Check if trial was found and updated
         if trial_response.status_code == 404:
             return jsonify({
                 "code": 404,
@@ -55,17 +78,53 @@ def cancel_trial(trial_id):
             return jsonify({
                 "code": 500,
                 "message": "Failed to update trial status",
-                "error": trial_result
+                "error": trial_response.json()
             }), 500
 
-        # Step 2: Return success
+        trial_data = trial_response.json().get("data", {})
+        student_id = trial_data.get("student_id")
+        tutor_id = trial_data.get("tutor_id")
+
+        # Step 2 — Refund student credits
+        print(f"[cancel_trial_lessons] Refunding credits to student {student_id}")
+        credit_response = requests.post(
+            f"{CREDIT_URL}/credit",
+            json={
+                "student_id": student_id,
+                "amount": 50  # refund amount
+            },
+            headers={"Content-Type": "application/json"}
+        )
+
+        if credit_response.status_code not in [200, 201]:
+            print(f"[cancel_trial_lessons] Credit refund failed: {credit_response.text}")
+
+        # Step 3 — Get student and tutor emails for notification
+        student_email = None
+        tutor_email = None
+
+        student_response = requests.get(f"{STUDENT_URL}/students/{student_id}")
+        if student_response.status_code == 200:
+            student_email = student_response.json().get("data", {}).get("email")
+
+        tutor_response = requests.get(f"{TUTOR_URL}/tutors/{tutor_id}")
+        if tutor_response.status_code == 200:
+            tutor_email = tutor_response.json().get("data", {}).get("email")
+
+        # Step 4 — Publish to RabbitMQ
+        publish_trial_cancelled(student_email, tutor_email, cancelled_by)
+
         return jsonify({
             "code": 200,
-            "message": f"Trial {trial_id} successfully cancelled by {cancelled_by}",
-            "data": trial_result.get("data")
+            "message": f"Trial {trial_id} cancelled by {cancelled_by}. Credits refunded to student.",
+            "data": {
+                "trial": trial_data,
+                "credit_refund": credit_response.json() if credit_response.status_code in [200, 201] else "failed"
+            }
         }), 200
 
     except Exception as e:
+        print(f"[cancel_trial_lessons] Exception: {str(e)}")
         return jsonify({
             "code": 500,
             "message": f"An error occurred: {str(e)}"
