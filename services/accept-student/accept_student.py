@@ -17,7 +17,7 @@ RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "rabbitmq")
 
 # Atomic service URLs (Docker service names)
 INTEREST_SERVICE_URL = os.environ.get("INTEREST_SERVICE_URL", "http://interest:5003") or "http://localhost:5003"
-BOOKING_SERVICE_URL = os.environ.get("BOOKING_SERVICE_URL", "http://booking:5007") or "http://localhost:5007"
+TRIALS_SERVICE_URL = os.environ.get("TRIALS_SERVICE_URL", "http://trials:5004") or "http://localhost:5004"
 
 
 # ── Publish to RabbitMQ helper ────────────────
@@ -60,7 +60,7 @@ def health():
 #   "subject": "Chemistry",
 #   "notes": ""                  (optional)
 # }
-@app.route("/accept-student", methods=["POST"])
+@app.route("/accept-student", methods=["POST"]) 
 def accept_student():
     try:
         data = request.get_json()
@@ -92,7 +92,7 @@ def accept_student():
                 "details": interest_resp.json()
             }), interest_resp.status_code
 
-        # Step 2 — Create trial record in Booking/Trials service
+        # Step 2 — Create trial record in Trials service
         trial_payload = {
             "student_id": student_id,
             "tutor_id":   tutor_id,
@@ -102,7 +102,7 @@ def accept_student():
             "subject":    data["subject"],
             "notes":      data.get("notes", "")
         }
-        trial_resp = http.post(f"{BOOKING_SERVICE_URL}/trials", json=trial_payload)
+        trial_resp = http.post(f"{TRIALS_SERVICE_URL}/trials", json=trial_payload)
         if trial_resp.status_code != 201:
             return jsonify({
                 "error": "Failed to create trial",
