@@ -27,6 +27,9 @@ docker run --rm --network host `
 ``
 
 ### Mac
+```
+deck sync --state kong.yaml --kong-addr http://localhost:8001
+```
 
 ## 4. Check if KONG has imported the KONG Gateway Services and Routes
 Go to http://localhost:8002 to see
