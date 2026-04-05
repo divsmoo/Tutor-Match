@@ -73,38 +73,39 @@ def make_trial_booking():
             return jsonify({"error": "Failed to fetch tutor details"}), 500
         tutor = tutor_response.json().get("data", tutor_response.json())
         tutor_rate = tutor.get("rate")
+        tutor_rate_cents = int(tutor_rate*100)
         
-        ##### TODO: FIXING PAYMENT MS FIRST ############
-        # # Step 2 — Set booking status to PENDING_PAYMENT (OPTIONAL)
-        # requests.put(
-        #     f"{TRIALS_SERVICE_URL}/trials/{trial_id}",
-        #     json={"status": "PENDING_PAYMENT"}
-        # )
-        # print("step 2 done")
-        # # Step 3 — Call OutSystems Payment Service
-        # order_id = str(uuid.uuid4())
-        # payment_payload = {
-        #     "OrderId": order_id,
-        #     "Amount": tutor_rate,
-        #     "Currency": "sgd"
-        # }
         
-        # headers = {"Content-Type": "application/json"}
+        # Step 2 — Set booking status to PENDING_PAYMENT (OPTIONAL)
+        requests.put(
+            f"{TRIALS_SERVICE_URL}/trials/{trial_id}",
+            json={"status": "PENDING_PAYMENT"}
+        )
 
-        # payment_response = requests.post(PAYMENT_SERVICE_URL, json=payment_payload, headers=headers)
-        # if payment_response.status_code != 200:
-        #     # Payment failed — cancel the booking
-        #     requests.put(
-        #         f"{TRIALS_SERVICE_URL}/trials/{trial_id}",
-        #         json={"status": "CANCELLED"}
-        #     )
-        #     payment_result = payment_response.json()
-        #     return jsonify({
-        #         "error": "Payment failed",
-        #         "details": payment_result.get("ErrorMessage", "Unknown error")
-        #     }), 402
-        # payment_result = payment_response.json()
-        # print("pass payment stage")
+        # Step 3 — Call OutSystems Payment Service
+        order_id = str(uuid.uuid4())
+        payment_payload = {
+            "OrderId": order_id,
+            "Amount": tutor_rate_cents,
+            "Currency": "sgd"
+        }
+        
+        headers = {"Content-Type": "application/json"}
+
+        payment_response = requests.post(PAYMENT_SERVICE_URL, json=payment_payload, headers=headers)
+        if payment_response.status_code != 200:
+            # Payment failed — cancel the booking
+            requests.put(
+                f"{TRIALS_SERVICE_URL}/trials/{trial_id}",
+                json={"status": "CANCELLED"}
+            )
+            payment_result = payment_response.json()
+            return jsonify({
+                "error": "Payment failed",
+                "details": payment_result.get("ErrorMessage", "Unknown error")
+            }), 402
+        payment_result = payment_response.json()
+        print("pass payment stage")
 
 
         # Step 4 — PUT Trials Service to update trial status to CONFIRMED
@@ -146,14 +147,14 @@ def make_trial_booking():
             # "payment_id": payment_result.get("PaymentId"),
             # "stripe_payment_intent_id": payment_result.get("StripePaymentIntentId"),
             "amount": tutor_rate,
-            "currency": "SGD"
+            "currency": "sgd"
         })
         return jsonify({
             "message": "Trial booking confirmed successfully. Tutor will be notified.",
             "trial_id": trial_id,
             # "payment_id": payment_result.get("PaymentId"),
             "amount": tutor_rate,
-            "currency": "SGD"
+            "currency": "sgd"
         }), 200
 
     # return 500 for unexpected server errors
