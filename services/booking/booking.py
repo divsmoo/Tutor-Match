@@ -36,7 +36,7 @@ def health():
 @app.route("/booking", methods=["GET"])
 def get_all_bookings():
     try:
-        response = supabase.table("booking").select("*").execute()
+        response = supabase.table("trials").select("*").execute()
         return jsonify({"data": response.data}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -46,7 +46,7 @@ def get_all_bookings():
 @app.route("/booking/<int:booking_id>", methods=["GET"])
 def get_booking(booking_id):
     try:
-        response = supabase.table("booking").select("*").eq("id", booking_id).execute()
+        response = supabase.table("trials").select("*").eq("trial_id", booking_id).execute()
         if not response.data:
             return jsonify({"error": "Booking not found"}), 404
         return jsonify({"data": response.data[0]}), 200
@@ -64,7 +64,7 @@ def create_booking():
         data["status"] = STATUS_PENDING_PAYMENT
 
         # Step 1 — Save booking as PENDING_PAYMENT
-        booking_response = supabase.table("booking").insert(data).execute()
+        booking_response = supabase.table("trials").insert(data).execute()
         booking = booking_response.data[0]
 
         # Step 2 — Orchestrate: call Payment service synchronously
@@ -77,11 +77,11 @@ def create_booking():
 
         if payment_response.status_code != 201:
             # Payment failed — update booking to CANCELLED
-            supabase.table("booking").update({"status": STATUS_CANCELLED}).eq("id", booking["id"]).execute()
+            supabase.table("trials").update({"status": STATUS_CANCELLED}).eq("id", booking["id"]).execute()
             return jsonify({"error": "Payment failed", "details": payment_response.json()}), 400
 
         # Step 3 — Payment succeeded — update booking to CONFIRMED
-        supabase.table("booking").update({"status": STATUS_CONFIRMED}).eq("id", booking["id"]).execute()
+        supabase.table("trials").update({"status": STATUS_CONFIRMED}).eq("id", booking["id"]).execute()
         return jsonify({"message": "Booking confirmed", "booking_id": booking["id"]}), 201
 
     except Exception as e:
@@ -94,7 +94,7 @@ def create_booking():
 def update_booking(booking_id):
     try:
         data = request.get_json()
-        response = supabase.table("booking").update(data).eq("id", booking_id).execute()
+        response = supabase.table("trials").update(data).eq("id", booking_id).execute()
         if not response.data:
             return jsonify({"error": "Booking not found"}), 404
         return jsonify({"data": response.data[0]}), 200

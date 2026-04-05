@@ -152,7 +152,6 @@ services:
     container_name: make-trial-booking
     ports:
       - "5013:5013"
-    environment:
     env_file:
       - .env
     depends_on:
