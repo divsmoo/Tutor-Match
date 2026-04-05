@@ -17,26 +17,9 @@ RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "rabbitmq")
 
 # Atomic service URLs (Docker service names)
 BOOKING_SERVICE_URL = "http://booking:5004"
-NOTIFICATION_SERVICE_URL = "http://notification:5006"
 
-
-# ── Health check ─────────────────────────────
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"service": "make-trial-booking", "status": "running"}), 200
-
-
-### HTTP POST request from student UI to make trial booking
-### Takes in student_id, tutor_id, timeslot, trial_id
-### 1. Call Payment Service to make payment 
-### 2. Calls Booking Service to update status from PENDING to BOOKED/CONFIRMED
-### 3. Notify Tutor (tutor_id) via Notification MS
-@app.route("/make-trial-booking", methods=["POST"])
-def make_trial_booking():
-    
-
-
-
+# OutSystems Payment service — set PAYMENT_SERVICE_URL in your .env or Docker environment
+PAYMENT_SERVICE_URL = os.environ.get("PAYMENT_SERVICE_URL", "http://localhost/payment-placeholder")
 
 
 # ── Publish to RabbitMQ helper ────────────────
@@ -52,56 +35,66 @@ def publish_event(queue_name, message: dict):
             properties=pika.BasicProperties(delivery_mode=2)  # make message persistent
         )
         connection.close()
-        print(f"[indicate-interest] Published to {queue_name}: {message}")
+        print(f"[make-trial-booking] Published to {queue_name}: {message}")
     except Exception as e:
-        print(f"[indicate-interest] RabbitMQ publish error: {e}")
+        print(f"[make-trial-booking] RabbitMQ publish error: {e}")
 
 
+# ── Health check ─────────────────────────────
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"service": "make-trial-booking", "status": "running"}), 200
 
 
-
-# ── POST — Student indicates interest in a tutor ──────────────
-# This is the main composite flow for Scenario 1
-# Expected body: { "student_id": 1, "tutor_id": 2, "student_name": "Alice" }
-@app.route("/indicate-interest", methods=["POST"])
-def indicate_interest():
+# ── POST — Student confirms a trial booking ──────────────
+# Tutor has already proposed available timeslots; student selects one in the UI.
+# Expected body: { "student_id": 1, "tutor_id": 2, "timeslot": "2025-06-01T10:00:00", "trial_id": 3 }
+@app.route("/make-trial-booking", methods=["POST"])
+def make_trial_booking():
     try:
         data = request.get_json()
         student_id = data.get("student_id")
         tutor_id = data.get("tutor_id")
-        student_name = data.get("student_name")
+        timeslot = data.get("timeslot")
+        trial_id = data.get("trial_id")
 
-        if not all([student_id, tutor_id, student_name]):
-            return jsonify({"error": "Missing required fields: student_id, tutor_id, student_name"}), 400
+        if not all([student_id, tutor_id, timeslot, trial_id]):
+            return jsonify({"error": "Missing required fields: student_id, tutor_id, timeslot, trial_id"}), 400
 
-        # Step 1 — Fetch tutor contact info from Tutor service
-        tutor_response = http.get(f"{TUTOR_SERVICE_URL}/tutor/{tutor_id}")
-        if tutor_response.status_code != 200:
-            return jsonify({"error": "Tutor not found"}), 404
-        tutor = tutor_response.json()["data"]
-        tutor_email = tutor.get("email")
-
-        # Step 2 — Save PENDING interest record in Interest service
-        interest_payload = {"student_id": student_id, "tutor_id": tutor_id}
-        interest_response = http.post(f"{INTEREST_SERVICE_URL}/interest", json=interest_payload)
-        if interest_response.status_code != 201:
-            return jsonify({"error": "Failed to create interest record"}), 500
-        interest = interest_response.json()["data"][0]
-
-        # Step 3 — Publish InterestCreated event to RabbitMQ
-        # Notification service will pick this up and email the tutor
-        publish_event("InterestCreated", {
-            "interest_id": interest["id"],
-            "tutor_id": tutor_id,
-            "tutor_email": tutor_email,
+        # Step 1 — Call OutSystems Payment Service to process payment
+        # TODO: confirm exact endpoint path and payload fields with OutSystems team
+        payment_payload = {
             "student_id": student_id,
-            "student_name": student_name
+            "tutor_id": tutor_id,
+            "trial_id": trial_id
+        }
+        payment_response = http.post(PAYMENT_SERVICE_URL, json=payment_payload)
+        if payment_response.status_code != 200:
+            return jsonify({"error": "Payment failed"}), 402
+
+        # Step 2 — PATCH Booking Service to update trial status from PENDING to CONFIRMED
+        booking_response = http.patch(
+            f"{BOOKING_SERVICE_URL}/booking/{trial_id}",
+            json={"status": "CONFIRMED", "timeslot": timeslot}
+        )
+        if booking_response.status_code != 200:
+            return jsonify({"error": "Failed to confirm booking"}), 500
+        booking = booking_response.json()["data"][0]
+
+        # Step 3 — Publish BookingConfirmed event to RabbitMQ
+        # Notification service will pick this up and notify the tutor
+        publish_event("BookingConfirmed", {
+            "booking_id": booking["id"],
+            "trial_id": trial_id,
+            "tutor_id": tutor_id,
+            "student_id": student_id,
+            "timeslot": timeslot
         })
 
         return jsonify({
-            "message": "Interest indicated successfully. Tutor will be notified.",
-            "interest_id": interest["id"]
-        }), 201
+            "message": "Trial booking confirmed successfully. Tutor will be notified.",
+            "booking_id": booking["id"]
+        }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
