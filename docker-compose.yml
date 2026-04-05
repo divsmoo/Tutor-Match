@@ -147,6 +147,23 @@ services:
         condition: service_started
     restart: on-failure
 
+  make-trial-booking:
+    build: ./services/make-trial-booking
+    container_name: make-trial-booking
+    ports:
+      - "5013:5013"
+    environment:
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      tutor:
+        condition: service_started
+      interest:
+        condition: service_started
+    restart: on-failure
+
   #######################################
   # Postgres: The database used by Kong
   #######################################
