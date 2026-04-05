@@ -5,6 +5,7 @@ import requests
 import pika
 import json
 import os
+import uuid
 
 load_dotenv()
 
@@ -17,6 +18,9 @@ RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "rabbitmq")
 
 # Atomic service URLs (Docker service names)
 BOOKING_SERVICE_URL = "http://booking:5004"
+STUDENT_SERVICE_URL = "http://student:5002"
+TUTOR_SERVICE_URL = "http://tutor:5001"
+TRIAL_LESSON_FEE = 40  # flat fee in SGD
 
 # OutSystems Payment service — set PAYMENT_SERVICE_URL in your .env or Docker environment
 PAYMENT_SERVICE_URL = os.environ.get("PAYMENT_SERVICE_URL", "http://localhost/payment-placeholder")
@@ -48,53 +52,98 @@ def health():
 
 # ── POST — Student confirms a trial booking ──────────────
 # Tutor has already proposed available timeslots; student selects one in the UI.
-# Expected body: { "student_id": 1, "tutor_id": 2, "timeslot": "2025-06-01T10:00:00", "trial_id": 3 }
+# Expected body: { "student_id": 1, "tutor_id": 2, "trial_date": "2025-06-01", "start_time": "10:00:00", "end_time": "11:00:00", "trial_id": 3 }
 @app.route("/make-trial-booking", methods=["POST"])
 def make_trial_booking():
     try:
         data = request.get_json()
         student_id = data.get("student_id")
         tutor_id = data.get("tutor_id")
-        timeslot = data.get("timeslot")
+        trial_date = data.get("trial_date")
+        start_time = data.get("start_time")
+        end_time = data.get("end_time")
         trial_id = data.get("trial_id")
+ 
+        if not all([student_id, tutor_id, trial_date, start_time, end_time, trial_id]):
+            return jsonify({"error": "Missing required fields: student_id, tutor_id, trial_date, start_time, end_time, trial_id"}), 400
 
-        if not all([student_id, tutor_id, timeslot, trial_id]):
-            return jsonify({"error": "Missing required fields: student_id, tutor_id, timeslot, trial_id"}), 400
+        # Step 1 — Use flat trial lesson fee
+        amount = TRIAL_LESSON_FEE
 
-        # Step 1 — Call OutSystems Payment Service to process payment
-        # TODO: confirm exact endpoint path and payload fields with OutSystems team
+        # Step 2 — Set booking status to PENDING_PAYMENT
+        requests.put(
+            f"{BOOKING_SERVICE_URL}/booking/{trial_id}",
+            json={"status": "PENDING_PAYMENT"}
+        )
+
+        # Step 3 — Call OutSystems Payment Service
+        order_id = str(uuid.uuid4())
         payment_payload = {
-            "student_id": student_id,
-            "tutor_id": tutor_id,
-            "trial_id": trial_id
+            "OrderId": order_id,
+            "Amount": amount,
+            "Currency": "SGD"
         }
         payment_response = requests.post(PAYMENT_SERVICE_URL, json=payment_payload)
         if payment_response.status_code != 200:
-            return jsonify({"error": "Payment failed"}), 402
+            # Payment failed — cancel the booking
+            requests.put(
+                f"{BOOKING_SERVICE_URL}/booking/{trial_id}",
+                json={"status": "CANCELLED"}
+            )
+            payment_result = payment_response.json()
+            return jsonify({
+                "error": "Payment failed",
+                "details": payment_result.get("ErrorMessage", "Unknown error")
+            }), 402
+        payment_result = payment_response.json()
 
-
-        # Step 2 — PUT Booking Service to update trial status from PENDING to CONFIRMED
+        # Step 4 — PUT Booking Service to update trial status to CONFIRMED
         booking_response = requests.put(
             f"{BOOKING_SERVICE_URL}/booking/{trial_id}",
-            json={"status": "CONFIRMED", "timeslot": timeslot}
+            json={"status": "CONFIRMED", "trial_date": trial_date, "start_time": start_time, "end_time": end_time}
         )
         if booking_response.status_code != 200:
             return jsonify({"error": "Failed to confirm booking"}), 500
-        booking = booking_response.json()["data"][0]
 
-        # Step 3 — Publish BookingConfirmed event to RabbitMQ
-        # Notification service will pick this up and notify the tutor
+        # Step 5 — Fetch student and tutor emails for notification
+        student_response = requests.get(f"{STUDENT_SERVICE_URL}/student/{student_id}")
+        if student_response.status_code != 200:
+            return jsonify({"error": "Failed to fetch student details"}), 500
+        student_data = student_response.json().get("data", student_response.json())
+        details = student_data.get("details", {})
+        student_email = details.get("email")
+
+        tutor_response = requests.get(f"{TUTOR_SERVICE_URL}/tutor/{tutor_id}")
+        if tutor_response.status_code != 200:
+            return jsonify({"error": "Failed to fetch tutor details"}), 500
+        tutor = tutor_response.json().get("data", tutor_response.json())
+        tutor_email = tutor.get("contact_info")
+
+        if not student_email or not tutor_email:
+            return jsonify({"error": "Could not retrieve email addresses for notification"}), 500
+
+        # Step 6 — Publish LessonConfirmed event to RabbitMQ
+        # Notification service will pick this up and notify both parties
         publish_event("LessonConfirmed", {
-            "booking_id": booking["id"],
             "trial_id": trial_id,
             "tutor_id": tutor_id,
             "student_id": student_id,
-            "timeslot": timeslot
+            "student_email": student_email,
+            "tutor_email": tutor_email,
+            "confirmed_date": trial_date,
+            "start_time": start_time,
+            "end_time": end_time,
+            "payment_id": payment_result.get("PaymentId"),
+            "stripe_payment_intent_id": payment_result.get("StripePaymentIntentId"),
+            "amount": amount,
+            "currency": "SGD"
         })
-
         return jsonify({
             "message": "Trial booking confirmed successfully. Tutor will be notified.",
-            "booking_id": booking["id"]
+            "trial_id": trial_id,
+            "payment_id": payment_result.get("PaymentId"),
+            "amount": amount,
+            "currency": "SGD"
         }), 200
 
     # return 500 for unexpected server errors
