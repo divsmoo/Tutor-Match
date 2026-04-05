@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-import requests as http
+import requests
 import pika
 import json
 import os
@@ -68,12 +68,13 @@ def make_trial_booking():
             "tutor_id": tutor_id,
             "trial_id": trial_id
         }
-        payment_response = http.post(PAYMENT_SERVICE_URL, json=payment_payload)
+        payment_response = requests.post(PAYMENT_SERVICE_URL, json=payment_payload)
         if payment_response.status_code != 200:
             return jsonify({"error": "Payment failed"}), 402
 
-        # Step 2 — PATCH Booking Service to update trial status from PENDING to CONFIRMED
-        booking_response = http.patch(
+
+        # Step 2 — PUT Booking Service to update trial status from PENDING to CONFIRMED
+        booking_response = requests.put(
             f"{BOOKING_SERVICE_URL}/booking/{trial_id}",
             json={"status": "CONFIRMED", "timeslot": timeslot}
         )
@@ -83,7 +84,7 @@ def make_trial_booking():
 
         # Step 3 — Publish BookingConfirmed event to RabbitMQ
         # Notification service will pick this up and notify the tutor
-        publish_event("BookingConfirmed", {
+        publish_event("LessonConfirmed", {
             "booking_id": booking["id"],
             "trial_id": trial_id,
             "tutor_id": tutor_id,
@@ -96,6 +97,7 @@ def make_trial_booking():
             "booking_id": booking["id"]
         }), 200
 
+    # return 500 for unexpected server errors
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
