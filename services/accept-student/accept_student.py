@@ -17,7 +17,7 @@ RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "rabbitmq")
 
 # Atomic service URLs (Docker service names)
 INTEREST_SERVICE_URL = os.environ.get("INTEREST_SERVICE_URL", "http://interest:5003") or "http://localhost:5003"
-TRIALS_SERVICE_URL = os.environ.get("TRIALS_SERVICE_URL", "http://booking:5004") or "http://localhost:5004"
+TRIALS_SERVICE_URL = os.environ.get("TRIALS_SERVICE_URL", "http://trials:5004") or "http://localhost:5004"
 
 
 # ── Publish to RabbitMQ helper ────────────────
