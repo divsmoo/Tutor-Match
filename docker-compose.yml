@@ -1,5 +1,3 @@
-version: "3.8"
-
 # ─────────────────────────────────────────────────────────────
 # ESD G7T1 — Tutor Matching Platform
 # Supabase (PostgreSQL) is hosted remotely — no local DB needed
@@ -24,7 +22,8 @@ services:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 15
+      start_period: 60s
 
   # ── Atomic Services ─────────────────────────────────────────
   tutor:
@@ -128,6 +127,44 @@ services:
         condition: service_started
     restart: on-failure
 
+  continue-lessons:
+    build: ./services/continue-lessons
+    container_name: continue-lessons
+    ports:
+      - "5014:5014"
+    environment:
+      - BOOKING_SERVICE_URL=http://booking:5004
+      - TUTOR_SERVICE_URL=http://tutor:5001
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      booking:
+        condition: service_started
+      tutor:
+        condition: service_started
+    restart: on-failure
+
+  cancel-trial-booking:
+    build: ./services/cancel-trial-booking
+    container_name: cancel-trial-booking
+    ports:
+      - "5015:5015"
+    environment:
+      - BOOKING_SERVICE_URL=http://booking:5004
+      - TUTOR_SERVICE_URL=http://tutor:5001
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      booking:
+        condition: service_started
+      tutor:
+        condition: service_started
+    restart: on-failure
+
   get-interested-students:
     build: ./services/get-interested-students
     container_name: get-interested-students
@@ -144,6 +181,25 @@ services:
       tutor:
         condition: service_started
       interest:
+        condition: service_started
+    restart: on-failure
+
+  accept-student:
+    build: ./services/accept-student
+    container_name: accept-student
+    ports:
+      - "5012:5012"
+    environment:
+      - INTEREST_SERVICE_URL=http://interest:5003
+      - BOOKING_SERVICE_URL=http://booking:5004
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      interest:
+        condition: service_started
+      booking:
         condition: service_started
     restart: on-failure
 

@@ -1,29 +1,356 @@
 _format_version: "3.0"
 services:
-- connect_timeout: 60000
-  enabled: true
-  host: tutor
-  name: tutor-service
-  port: 5001
-  protocol: http
-  read_timeout: 60000
-  retries: 5
-  routes:
-  - https_redirect_status_code: 426
-    methods:
-    - GET
-    name: GET
-    path_handling: v0
-    paths:
-    - /tutorrr
-    preserve_host: false
-    protocols:
-    - http
-    - https
-    regex_priority: 0
-    request_buffering: true
-    response_buffering: true
-    strip_path: true
-  tags:
-  - test2ndApril
-  write_timeout: 60000
+
+  # ── Atomic Services ───────────────────────────────────────────
+
+  - name: tutor-service
+    host: tutor
+    port: 5001
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: tutor-all
+      paths:
+      - /tutor
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: student-service
+    host: student
+    port: 5002
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: student-all
+      paths:
+      - /student
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: interest-service
+    host: interest
+    port: 5003
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: interest-all
+      paths:
+      - /interest
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: booking-service
+    host: booking
+    port: 5004
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: booking-all
+      paths:
+      - /booking
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: payment-service
+    host: payment
+    port: 5005
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: payment-all
+      paths:
+      - /payment
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: credit-service
+    host: credit
+    port: 5007
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: credit-all
+      paths:
+      - /credit
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  # ── Composite Services ────────────────────────────────────────
+
+  - name: indicate-interest-service
+    host: indicate-interest
+    port: 5010
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: indicate-interest-all
+      paths:
+      - /indicate-interest
+      methods:
+      - GET
+      - POST
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: get-interested-students-service
+    host: get-interested-students
+    port: 5011
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: get-interested-students-all
+      paths:
+      - /get-interested-students
+      methods:
+      - GET
+      - POST
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: accept-student-service
+    host: accept-student
+    port: 5012
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: accept-student-all
+      paths:
+      - /accept-student
+      methods:
+      - GET
+      - POST
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: make-trial-booking-service
+    host: make-trial-booking
+    port: 5013
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: make-trial-booking-all
+      paths:
+      - /make-trial-booking
+      methods:
+      - GET
+      - POST
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: continue-lessons-service
+    host: continue-lessons
+    port: 5014
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: continue-lessons-all
+      paths:
+      - /continue-lessons
+      methods:
+      - GET
+      - POST
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: cancel-trial-booking-service
+    host: cancel-trial-booking
+    port: 5015
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: cancel-trial-booking-all
+      paths:
+      - /cancel-trial-booking
+      methods:
+      - GET
+      - POST
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true
+
+  - name: cancel-trial-lessons-service
+    host: cancel-trial-lessons
+    port: 5016
+    protocol: http
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    enabled: true
+    routes:
+    - name: cancel-trial-lessons-all
+      paths:
+      - /cancel-trial-lessons
+      methods:
+      - GET
+      - POST
+      strip_path: false
+      path_handling: v0
+      preserve_host: false
+      protocols:
+      - http
+      https_redirect_status_code: 426
+      regex_priority: 0
+      request_buffering: true
+      response_buffering: true

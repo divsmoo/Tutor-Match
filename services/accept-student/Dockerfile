@@ -7,8 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5006
+EXPOSE 5012
 
-ENV PYTHONUNBUFFERED=1
-
-CMD ["python", "notification.py"]
+CMD ["python", "accept_student.py"]
