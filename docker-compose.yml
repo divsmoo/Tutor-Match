@@ -62,9 +62,9 @@ services:
         condition: service_healthy
     restart: on-failure
 
-  booking:
-    build: ./services/booking
-    container_name: booking
+  trials:
+    build: ./services/trials
+    container_name: trials
     ports:
       - "5004:5004"
     env_file:
@@ -133,14 +133,14 @@ services:
     ports:
       - "5014:5014"
     environment:
-      - BOOKING_SERVICE_URL=http://booking:5004
+      - TRIALS_SERVICE_URL=http://trials:5004
       - TUTOR_SERVICE_URL=http://tutor:5001
     env_file:
       - .env
     depends_on:
       rabbitmq:
         condition: service_healthy
-      booking:
+      trials:
         condition: service_started
       tutor:
         condition: service_started
@@ -152,14 +152,14 @@ services:
     ports:
       - "5015:5015"
     environment:
-      - BOOKING_SERVICE_URL=http://booking:5004
+      - TRIALS_SERVICE_URL=http://trials:5004
       - TUTOR_SERVICE_URL=http://tutor:5001
     env_file:
       - .env
     depends_on:
       rabbitmq:
         condition: service_healthy
-      booking:
+      trials:
         condition: service_started
       tutor:
         condition: service_started
@@ -191,7 +191,7 @@ services:
       - "5012:5012"
     environment:
       - INTEREST_SERVICE_URL=http://interest:5003
-      - BOOKING_SERVICE_URL=http://booking:5004
+      - TRIALS_SERVICE_URL=http://trials:5004
     env_file:
       - .env
     depends_on:
@@ -199,7 +199,23 @@ services:
         condition: service_healthy
       interest:
         condition: service_started
-      booking:
+      trials:
+        condition: service_started
+    restart: on-failure
+
+  make-trial-booking:
+    build: ./services/make-trial-booking
+    container_name: make-trial-booking
+    ports:
+      - "5013:5013"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      tutor:
+        condition: service_started
+      interest:
         condition: service_started
     restart: on-failure
 
