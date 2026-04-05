@@ -2,16 +2,25 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from supabase import create_client, Client
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
 # Supabase Config
-SUPABASE_URL = "https://effbychudvpmpjafxrfr.supabase.co"
-SUPABASE_KEY = "sb_publishable_S8AkmmMOyTanEqnt7zI9oQ_uCk92qYK"
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 VALID_STATUSES = ['CONFIRMED', 'USER_CANCELLED', 'TUTOR_CANCELLED', 'COMPLETED']
+
+# ── Health check ─────────────────────────────
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"service": "trials", "status": "running"}), 200
+
 
 # -----------------------------------------------
 # GET all trials
@@ -42,7 +51,7 @@ def create_trial():
         data = request.get_json()
 
         # Validate required fields
-        required_fields = ['student_id', 'tutor_id', 'trial_date', 'start_time', 'end_time']
+        required_fields = ['student_id', 'tutor_id']
         for field in required_fields:
             if field not in data:
                 return jsonify({

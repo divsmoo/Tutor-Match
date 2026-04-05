@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 5004
 
-CMD ["python", "booking.py"]
+CMD ["python", "trials.py"]
