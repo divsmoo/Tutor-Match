@@ -85,18 +85,23 @@ def cancel_trial(trial_id):
         student_id = trial_data.get("student_id")
         tutor_id = trial_data.get("tutor_id")
 
-        # Step 2 — Refund student credits
+        # Step 2 — Refund student credits via GraphQL
         print(f"[cancel_trial_lessons] Refunding credits to student {student_id}")
+        credit_mutation = """
+            mutation {
+                upsertCredits(studentId: %d, amount: 50) {
+                    studentId
+                    balance
+                }
+            }
+        """ % student_id
         credit_response = requests.post(
-            f"{CREDIT_URL}/credit",
-            json={
-                "student_id": student_id,
-                "amount": 50  # refund amount
-            },
+            f"{CREDIT_URL}/graphql",
+            json={"query": credit_mutation},
             headers={"Content-Type": "application/json"}
         )
 
-        if credit_response.status_code not in [200, 201]:
+        if credit_response.status_code != 200 or credit_response.json().get("errors"):
             print(f"[cancel_trial_lessons] Credit refund failed: {credit_response.text}")
 
         # Step 3 — Get student and tutor emails for notification
@@ -119,7 +124,7 @@ def cancel_trial(trial_id):
             "message": f"Trial {trial_id} cancelled by {cancelled_by}. Credits refunded to student.",
             "data": {
                 "trial": trial_data,
-                "credit_refund": credit_response.json() if credit_response.status_code in [200, 201] else "failed"
+                "credit_refund": credit_response.json().get("data", {}).get("upsertCredits") if credit_response.status_code == 200 else "failed"
             }
         }), 200
 
