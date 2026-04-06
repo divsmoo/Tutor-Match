@@ -2,19 +2,16 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from supabase import create_client, Client
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
 # Supabase Config
-<<<<<<< Updated upstream:services/booking/booking.py
-SUPABASE_URL = "https://effbychudvpmpjafxrfr.supabase.co"
-SUPABASE_KEY = "sb_publishable_S8AkmmMOyTanEqnt7zI9oQ_uCk92qYK"
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-=======
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
->>>>>>> Stashed changes:services/trials/trials.py
 
 def _is_placeholder_env(value: str | None) -> bool:
     if not value:
@@ -62,8 +59,7 @@ def _mock_find(trial_id: int) -> dict | None:
             return t
     return None
 
-<<<<<<< Updated upstream:services/booking/booking.py
-=======
+
 # ── Health check ─────────────────────────────
 @app.route("/health", methods=["GET"])
 def health():
@@ -75,8 +71,6 @@ def health():
         }
     ), 200
 
-
->>>>>>> Stashed changes:services/trials/trials.py
 # -----------------------------------------------
 # GET all trials
 # -----------------------------------------------
@@ -109,7 +103,7 @@ def create_trial():
         data = request.get_json()
 
         # Validate required fields
-        required_fields = ['student_id', 'tutor_id', 'trial_date', 'start_time', 'end_time']
+        required_fields = ['student_id', 'tutor_id']
         for field in required_fields:
             if field not in data:
                 return jsonify({
