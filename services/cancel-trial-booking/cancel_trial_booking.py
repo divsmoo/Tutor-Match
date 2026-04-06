@@ -14,7 +14,7 @@ CORS(app)
 PORT = 5015
 RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "rabbitmq")
 
-BOOKING_SERVICE_URL = os.environ.get("BOOKING_SERVICE_URL", "http://booking:5004")
+TRIALS_SERVICE_URL = os.environ.get("TRIALS_SERVICE_URL", "http://trials:5004")
 TUTOR_SERVICE_URL = os.environ.get("TUTOR_SERVICE_URL", "http://tutor:5001")
 
 # Trials that can still be cancelled by the student (after tutor proposes; before terminal states)
@@ -40,7 +40,7 @@ def publish_event(queue_name: str, message: dict):
 
 
 def _get_trials_from_booking():
-    r = http.get(f"{BOOKING_SERVICE_URL}/trials", timeout=30)
+    r = http.get(f"{TRIALS_SERVICE_URL}/trials", timeout=30)
     if r.status_code != 200:
         return None, r
     payload = r.json()
@@ -122,8 +122,6 @@ def get_available_dates():
         ),
         200,
     )
-
-
 @app.route("/cancel-trial-booking", methods=["POST"])
 def cancel_trial_booking():
     """
@@ -165,7 +163,7 @@ def cancel_trial_booking():
         tid = int(trial["trial_id"])
         put_body = {"status": "USER_CANCELLED"}
         put_resp = http.put(
-            f"{BOOKING_SERVICE_URL}/trials/{tid}",
+            f"{TRIALS_SERVICE_URL}/trials/{tid}",
             json=put_body,
             timeout=30,
         )
