@@ -174,7 +174,6 @@ services:
       - TRIALS_SERVICE_URL=http://trials:5004
       - CREDIT_SERVICE_URL=http://credit:5007
       - STUDENT_SERVICE_URL=http://student:5002
-      - TUTOR_SERVICE_URL=http://tutor:5001
     env_file:
       - .env
     depends_on:
@@ -185,8 +184,6 @@ services:
       credit:
         condition: service_started
       student:
-        condition: service_started
-      tutor:
         condition: service_started
     restart: on-failure
 

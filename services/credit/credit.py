@@ -3,7 +3,7 @@ from flask_cors import CORS
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import strawberry
-from strawberry.flask import GraphQLView
+from strawberry.flask.views import GraphQLView
 from typing import Optional
 import os
 
