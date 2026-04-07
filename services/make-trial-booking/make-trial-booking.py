@@ -20,7 +20,7 @@ TRIALS_SERVICE_URL  = "http://trials:5004"
 STUDENT_SERVICE_URL = "http://student:5002"
 TUTOR_SERVICE_URL   = "http://tutor:5001"
 
-PAYMENT_SERVICE_URL = os.environ.get("PAYMENT_SERVICE_URL", "http://localhost/payment-placeholder")
+PAYMENT_SERVICE_URL = os.environ.get("PAYMENT_SERVICE_URL", "https://personal-tiwkqptq.outsystemscloud.com/PaymentCore/rest/CreatePaymentAPI/payments")
 
 REQUIRED_FIELDS = ["student_id", "tutor_id", "trial_date", "start_time", "end_time", "trial_id"]
 
@@ -110,7 +110,7 @@ def make_trial_booking():
         trial_date = data["trial_date"]
         start_time = data["start_time"]
         end_time   = data["end_time"]
-
+    
         # ── 2. Fetch tutor rate ──────────────────
         tutor = fetch_tutor(tutor_id)
         tutor_rate = tutor.get("rate")
@@ -130,7 +130,10 @@ def make_trial_booking():
 
         if payment_response.status_code != 200:
             update_trial_status(trial_id, "CANCELLED")
-            error_detail = payment_response.json().get("ErrorMessage", "Unknown error")
+            try:
+                error_detail = payment_response.json().get("ErrorMessage", "Unknown error")
+            except Exception:
+                error_detail = payment_response.text or "Unknown error"
             return jsonify({"error": "Payment failed", "details": error_detail}), 402
 
         # ── 5. Confirm the trial ─────────────────

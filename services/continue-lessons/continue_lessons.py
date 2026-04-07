@@ -16,7 +16,7 @@ PORT = 5014
 RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "rabbitmq")
 
 # Atomic service URLs (Docker service names)
-BOOKING_SERVICE_URL = os.environ.get("BOOKING_SERVICE_URL", "http://booking:5004")
+TRIALS_SERVICE_URL = os.environ.get("TRIALS_SERVICE_URL", "http://trials:5004")
 TUTOR_SERVICE_URL = os.environ.get("TUTOR_SERVICE_URL", "http://tutor:5001")
 
 
@@ -60,7 +60,7 @@ def continue_lessons():
 
         # Step 1 — Update trial status to COMPLETED in Booking service
         booking_response = http.put(
-            f"{BOOKING_SERVICE_URL}/trials/{trial_id}",
+            f"{TRIALS_SERVICE_URL}/trials/{trial_id}",
             json={"status": "COMPLETED"}
         )
         if booking_response.status_code != 200:
