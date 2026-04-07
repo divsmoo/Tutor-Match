@@ -81,37 +81,69 @@ def on_lesson_confirmed(ch, method, properties, body):
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
-def on_trial_cancelled(ch, method, properties, body):
-    """Notify tutor when student cancels"""
+def on_lesson_continued(ch, method, properties, body):
+    """Scenario 2c — Notify tutor when student opts to continue lessons"""
     data = json.loads(body)
     tutor_email = data.get("tutor_email")
-    send_email(tutor_email, "Trial Lesson Cancelled", "A student has cancelled their trial booking.")
+    tutor_name = data.get("tutor_name")
+    send_email(
+        to_address=tutor_email,
+        subject="A Student Wants to Continue Lessons",
+        body=f"Hi {tutor_name}, a student has opted to continue lessons with you. Please log in to arrange further sessions."
+    )
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+
+def on_trial_cancelled(ch, method, properties, body):
+    data = json.loads(body)
+    cancelled_by = data.get("cancelled_by", "STUDENT")
+    student_email = data.get("student_email")
+    tutor_email = data.get("tutor_email")
+
+    if cancelled_by == "TUTOR":
+        # Scenario 3b — Notify student when tutor cancels
+        send_email(
+            to_address=student_email,
+            subject="Trial Lesson Cancelled by Tutor",
+            body="Your tutor has cancelled the trial lesson."
+        )
+    else:
+        # Scenario 3a — Notify tutor when student cancels
+        send_email(
+            to_address=tutor_email,
+            subject="Trial Lesson Cancelled",
+            body="A student has cancelled their trial booking."
+        )
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
 def start_consuming():
     """Start listening to all RabbitMQ queues in a background thread"""
-    try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
-        channel = connection.channel()
+    import time
+    while True:
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+            channel = connection.channel()
 
-        # Declare queues (safe to call even if they already exist)
-        queues = {
-            "InterestCreated": on_interest_created,
-            "InterestAccepted": on_interest_accepted,
-            "LessonConfirmed": on_lesson_confirmed,
-            "TrialCancelled": on_trial_cancelled,
-        }
+            # Declare queues (safe to call even if they already exist)
+            queues = {
+                "InterestCreated": on_interest_created,
+                "InterestAccepted": on_interest_accepted,
+                "LessonConfirmed": on_lesson_confirmed,
+                "TrialCancelled": on_trial_cancelled,
+                "LessonContinued": on_lesson_continued,
+            }
 
-        for queue_name, callback in queues.items():
-            channel.queue_declare(queue=queue_name, durable=True)
-            channel.basic_consume(queue=queue_name, on_message_callback=callback)
+            for queue_name, callback in queues.items():
+                channel.queue_declare(queue=queue_name, durable=True)
+                channel.basic_consume(queue=queue_name, on_message_callback=callback)
 
-        print("[Notification] Listening for events...")
-        channel.start_consuming()
+            print("[Notification] Listening for events...")
+            channel.start_consuming()
 
-    except Exception as e:
-        print(f"[Notification] RabbitMQ connection error: {e}")
+        except Exception as e:
+            print(f"[Notification] RabbitMQ connection error: {e}. Retrying in 5s...")
+            time.sleep(5)
 
 
 # ── Health check ─────────────────────────────

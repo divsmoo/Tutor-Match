@@ -14,8 +14,8 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-INTEREST_SERVICE_URL = os.environ.get("INTEREST_SERVICE_URL", "http://localhost:5003")
-STUDENT_SERVICE_URL = os.environ.get("STUDENT_SERVICE_URL", "http://localhost:5002")
+INTEREST_SERVICE_URL = os.environ.get("INTEREST_SERVICE_URL", "http://interest:5003")
+STUDENT_SERVICE_URL = os.environ.get("STUDENT_SERVICE_URL", "http://student:5002")
  
 # ── Health check ─────────────────────────────
 @app.route("/health", methods=["GET"])
@@ -44,7 +44,7 @@ def get_interested_students(tutor_id):
         # student_resp = requests.get(f"http://student:5002/student/{sid}")
         # student_resp = requests.get(f"http://localhost:5002/student/{sid}")
         if student_resp.status_code != 200:
-            return jsonify({"error": f"Student service error for id {sid}!"}), 502
+            return jsonify({"error": f"Student service error for id {sid}! Status: {student_resp.status_code}"}), 502
         students.append(student_resp.json().get("data"))
 
     # Step 3 — Return aggregated list
