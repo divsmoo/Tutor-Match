@@ -137,7 +137,7 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-5">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4 sm:space-y-5">
               {/* Order summary */}
               <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-xs space-y-2">
                 <p className="font-medium text-slate-700 dark:text-slate-200 mb-2">Order Summary</p>
@@ -229,7 +229,7 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
             </div>
 
             {/* Footer */}
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 px-4 sm:px-6 pb-5 sm:pb-6">
               <button onClick={handleClose} disabled={state === 'processing'}
                 className="btn-secondary flex-1 justify-center">
                 Cancel

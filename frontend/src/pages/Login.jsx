@@ -74,7 +74,7 @@ export default function Login() {
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-white dark:bg-slate-900">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12 bg-white dark:bg-slate-900">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">

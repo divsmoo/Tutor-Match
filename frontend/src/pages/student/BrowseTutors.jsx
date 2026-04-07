@@ -51,7 +51,7 @@ export default function BrowseTutors({ student, notify }) {
       </div>
 
       {/* Search */}
-      <div className="relative mb-6 max-w-sm">
+      <div className="relative mb-6 w-full sm:max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <input
           type="text"

@@ -69,73 +69,69 @@ export default function Home() {
 
       {/* ── Navbar ─────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100 dark:bg-slate-900/90 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-green-800 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-white" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 shrink-0">
+            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-green-800 flex items-center justify-center">
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
             </div>
-            <span className="font-bold text-slate-900 dark:text-white tracking-tight">TutorMatch</span>
+            <span className="font-bold text-slate-900 dark:text-white tracking-tight text-sm sm:text-base">TutorMatch</span>
           </button>
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
             <a href="#how-it-works" className="hover:text-slate-900 dark:hover:text-white transition-colors">How It Works</a>
             <a href="#for-students" className="hover:text-slate-900 dark:hover:text-white transition-colors">For Students</a>
             <a href="#for-tutors"   className="hover:text-slate-900 dark:hover:text-white transition-colors">For Tutors</a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button onClick={toggle} title="Toggle theme"
-              className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors p-2">
+              className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors p-1.5">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <Link to="/login"    className="btn-secondary text-xs px-3 py-2">Sign In</Link>
-            <Link to="/register" className="btn-primary  text-xs px-3 py-2">Get Started</Link>
+            <Link to="/login"    className="hidden sm:inline-flex btn-secondary text-xs px-3 py-1.5">Sign In</Link>
+            <Link to="/register" className="btn-primary text-xs px-3 py-1.5">Get Started</Link>
           </div>
         </div>
       </header>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-white dark:bg-slate-900">
-        {/* Background decorations */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-green-50 dark:bg-green-900/20 blur-3xl opacity-70" />
           <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full bg-amber-50 dark:bg-amber-900/20 blur-3xl opacity-60" />
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16 lg:py-24 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left */}
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-medium mb-5">
               <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
               Singapore's Tutor Matching Platform
             </div>
-            <h1 className="text-5xl font-bold text-slate-900 dark:text-white leading-[1.1] tracking-tight mb-5">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white leading-[1.1] tracking-tight mb-4 sm:mb-5">
               Find the right<br />
               <span className="text-green-800 dark:text-green-400">tutor for you.</span>
             </h1>
-            <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed mb-8 max-w-md">
+            <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 leading-relaxed mb-6 sm:mb-8 max-w-md">
               TutorMatch connects students with expert tutors across every subject.
               Browse, book a trial lesson, and start learning — all in one place.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link to="/register?role=student"
-                className="btn-primary px-6 py-3 text-sm">
+              <Link to="/register?role=student" className="btn-primary px-5 sm:px-6 py-2.5 sm:py-3 text-sm">
                 Find a Tutor <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link to="/register?role=tutor"
-                className="btn-secondary px-6 py-3 text-sm">
+              <Link to="/register?role=tutor" className="btn-secondary px-5 sm:px-6 py-2.5 sm:py-3 text-sm">
                 Become a Tutor
               </Link>
             </div>
-            <div className="flex items-center gap-6 mt-8 text-xs text-slate-400 dark:text-slate-500">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-6 sm:mt-8 text-xs text-slate-400 dark:text-slate-500">
               <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> No commitment required</span>
               <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> Trial lessons available</span>
             </div>
           </div>
 
-          {/* Right — mock tutor card */}
-          <div className="relative flex justify-center">
+          {/* Right — mock tutor card (hidden on smallest screens) */}
+          <div className="relative hidden sm:flex justify-center">
             <div className="absolute -top-4 -left-4 w-20 h-20 rounded-full bg-amber-100 dark:bg-amber-900/30 blur-xl opacity-80" />
             <div className="relative w-full max-w-sm">
-              {/* Floating card */}
               <div className="card p-5 shadow-xl border-slate-100 dark:border-slate-700">
                 <div className="flex items-start gap-3 mb-4">
                   <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center text-white font-bold text-lg shrink-0">A</div>
@@ -167,8 +163,8 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Second floating card offset */}
-              <div className="absolute -bottom-6 -right-6 card p-3 shadow-lg flex items-center gap-2 text-xs w-44">
+              {/* Floating offset card — hidden on small tablets too */}
+              <div className="absolute -bottom-6 -right-6 card p-3 shadow-lg hidden md:flex items-center gap-2 text-xs w-44">
                 <div className="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
                 </div>
@@ -182,16 +178,16 @@ export default function Home() {
         </div>
 
         {/* Stats bar */}
-        <div className="relative max-w-6xl mx-auto px-6 pb-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pb-8 sm:pb-12 lg:pb-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {[
-              { label: 'Active Tutors',   value: '500+' },
+              { label: 'Active Tutors',    value: '500+' },
               { label: 'Students Matched', value: '2,000+' },
               { label: 'Subjects Covered', value: '15+' },
-              { label: 'Avg. Rating',     value: '4.8 ★' },
+              { label: 'Avg. Rating',      value: '4.8 ★' },
             ].map(({ label, value }) => (
-              <div key={label} className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 text-center">
-                <p className="text-2xl font-bold text-green-800 dark:text-green-400">{value}</p>
+              <div key={label} className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 sm:p-5 text-center">
+                <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-400">{value}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{label}</p>
               </div>
             ))}
@@ -200,33 +196,32 @@ export default function Home() {
       </section>
 
       {/* ── Subjects ────────────────────────────────────────────── */}
-      <section className="py-16 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-10 sm:py-16 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-5 text-center">Subjects Available</p>
           <div className="flex flex-wrap justify-center gap-2">
             {SUBJECTS.map(({ name, color }) => (
-              <span key={name} className={`px-4 py-2 rounded-full text-sm font-medium border ${color}`}>{name}</span>
+              <span key={name} className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border ${color}`}>{name}</span>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── How It Works ────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-24 bg-slate-50 dark:bg-slate-800/50">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
+      <section id="how-it-works" className="py-12 sm:py-20 lg:py-24 bg-slate-50 dark:bg-slate-800/50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
             <p className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-widest mb-3">Simple Process</p>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">How TutorMatch works</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">How TutorMatch works</h2>
             <p className="text-slate-500 dark:text-slate-400 mt-3 max-w-md mx-auto text-sm">From browsing to booking in minutes. No complicated setup required.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 relative">
-            {/* Connecting line */}
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 relative">
             <div className="hidden md:block absolute top-10 left-1/4 right-1/4 h-px bg-slate-200 dark:bg-slate-700" />
 
             {STEPS.map(({ num, icon: Icon, title, desc }) => (
               <div key={num} className="relative">
-                <div className="card p-6 h-full hover:shadow-md transition-shadow">
+                <div className="card p-5 sm:p-6 h-full hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-10 w-10 rounded-xl bg-green-800 flex items-center justify-center shrink-0">
                       <Icon className="h-5 w-5 text-white" />
@@ -243,19 +238,19 @@ export default function Home() {
       </section>
 
       {/* ── For Students & Tutors ───────────────────────────────── */}
-      <section className="py-24 bg-white dark:bg-slate-900">
-        <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-8">
+      <section className="py-12 sm:py-20 lg:py-24 bg-white dark:bg-slate-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-4 sm:gap-8">
 
           {/* Students */}
-          <div id="for-students" className="bg-green-800 rounded-3xl p-8 text-white">
-            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center mb-5">
+          <div id="for-students" className="bg-green-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white">
+            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center mb-4 sm:mb-5">
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
-            <h3 className="text-2xl font-bold mb-2">For Students</h3>
-            <p className="text-green-100 text-sm mb-6 leading-relaxed">
+            <h3 className="text-xl sm:text-2xl font-bold mb-2">For Students</h3>
+            <p className="text-green-100 text-sm mb-5 sm:mb-6 leading-relaxed">
               Find an expert tutor who matches your learning style. Take a trial lesson risk-free before committing.
             </p>
-            <ul className="space-y-3 mb-8">
+            <ul className="space-y-3 mb-6 sm:mb-8">
               {STUDENT_FEATURES.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-3 text-sm">
                   <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center shrink-0">
@@ -272,15 +267,15 @@ export default function Home() {
           </div>
 
           {/* Tutors */}
-          <div id="for-tutors" className="bg-slate-900 rounded-3xl p-8 text-white">
-            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center mb-5">
+          <div id="for-tutors" className="bg-slate-900 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white">
+            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center mb-4 sm:mb-5">
               <BookOpen className="h-5 w-5 text-white" />
             </div>
-            <h3 className="text-2xl font-bold mb-2">For Tutors</h3>
-            <p className="text-slate-300 text-sm mb-6 leading-relaxed">
+            <h3 className="text-xl sm:text-2xl font-bold mb-2">For Tutors</h3>
+            <p className="text-slate-300 text-sm mb-5 sm:mb-6 leading-relaxed">
               Grow your tutoring practice. Reach motivated students, set your own rates, and manage all your bookings in one place.
             </p>
-            <ul className="space-y-3 mb-8">
+            <ul className="space-y-3 mb-6 sm:mb-8">
               {TUTOR_FEATURES.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-3 text-sm">
                   <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center shrink-0">
@@ -300,19 +295,19 @@ export default function Home() {
       </section>
 
       {/* ── CTA Banner ──────────────────────────────────────────── */}
-      <section className="py-20 bg-green-800">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-3">Ready to get started?</h2>
-          <p className="text-green-200 text-sm mb-8 max-w-sm mx-auto">
+      <section className="py-12 sm:py-20 bg-green-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Ready to get started?</h2>
+          <p className="text-green-200 text-sm mb-6 sm:mb-8 max-w-sm mx-auto">
             Create your account in under a minute. No credit card required to browse.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/register"
-              className="inline-flex items-center gap-2 bg-white text-green-900 font-semibold text-sm px-6 py-3 rounded-lg hover:bg-green-50 transition-colors">
+              className="inline-flex items-center gap-2 bg-white text-green-900 font-semibold text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-green-50 transition-colors">
               Create Free Account <ArrowRight className="h-4 w-4" />
             </Link>
             <Link to="/login"
-              className="inline-flex items-center gap-2 bg-white/10 text-white font-medium text-sm px-6 py-3 rounded-lg hover:bg-white/20 transition-colors border border-white/20">
+              className="inline-flex items-center gap-2 bg-white/10 text-white font-medium text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-white/20 transition-colors border border-white/20">
               Sign In
             </Link>
           </div>
@@ -320,15 +315,15 @@ export default function Home() {
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────── */}
-      <footer className="bg-slate-950 text-slate-400 py-10">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="bg-slate-950 text-slate-400 py-8 sm:py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="h-6 w-6 rounded-md bg-green-700 flex items-center justify-center">
               <Sparkles className="h-3 w-3 text-white" />
             </div>
             <span className="text-sm font-semibold text-slate-300">TutorMatch</span>
           </div>
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-slate-600 text-center">
             © 2026 TutorMatch · ESD G7T1 · Singapore Management University
           </p>
           <div className="flex gap-4 text-xs">

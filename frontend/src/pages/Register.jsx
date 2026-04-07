@@ -111,7 +111,7 @@ export default function Register() {
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-white dark:bg-slate-900 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12 bg-white dark:bg-slate-900 overflow-y-auto">
         <div className="w-full max-w-sm">
           <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="h-7 w-7 rounded-lg bg-green-800 flex items-center justify-center">
