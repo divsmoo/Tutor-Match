@@ -95,10 +95,25 @@ def on_lesson_continued(ch, method, properties, body):
 
 
 def on_trial_cancelled(ch, method, properties, body):
-    """Notify tutor when student cancels"""
     data = json.loads(body)
+    cancelled_by = data.get("cancelled_by", "STUDENT")
+    student_email = data.get("student_email")
     tutor_email = data.get("tutor_email")
-    send_email(tutor_email, "Trial Lesson Cancelled", "A student has cancelled their trial booking.")
+
+    if cancelled_by == "TUTOR":
+        # Scenario 3b — Notify student when tutor cancels
+        send_email(
+            to_address=student_email,
+            subject="Trial Lesson Cancelled by Tutor",
+            body="Your tutor has cancelled the trial lesson."
+        )
+    else:
+        # Scenario 3a — Notify tutor when student cancels
+        send_email(
+            to_address=tutor_email,
+            subject="Trial Lesson Cancelled",
+            body="A student has cancelled their trial booking."
+        )
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
