@@ -40,8 +40,8 @@ export default function MyInterests({ student }) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">My Interests</h2>
-          <p className="text-sm text-slate-500 mt-1">Track the status of your interest requests</p>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">My Interests</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Track the status of your interest requests</p>
         </div>
         <button onClick={load} className="btn-secondary">
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
@@ -66,15 +66,15 @@ export default function MyInterests({ student }) {
                       {tutor?.name?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 text-sm">
+                      <p className="font-medium text-slate-900 dark:text-white text-sm">
                         {tutor?.name ?? `Tutor #${interest.tutor_id}`}
                       </p>
-                      <p className="text-xs text-slate-400 mt-0.5">{tutor?.subject ?? '–'}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{tutor?.subject ?? '–'}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <Badge status={interest.status} />
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                       {new Date(interest.created).toLocaleDateString('en-SG', {
                         day: 'numeric', month: 'short', year: 'numeric'
                       })}
@@ -83,8 +83,8 @@ export default function MyInterests({ student }) {
                 </div>
 
                 {interest.status === 'ACCEPTED' && (
-                  <div className="mt-3 pt-3 border-t border-slate-100">
-                    <p className="text-xs text-emerald-700 font-medium">
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
                       Tutor accepted your interest. Check <strong>My Trials</strong> to confirm and pay.
                     </p>
                   </div>

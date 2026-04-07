@@ -46,12 +46,12 @@ export default function BrowseTutors({ student, notify }) {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-slate-900">Browse Tutors</h2>
-        <p className="text-sm text-slate-500 mt-1">Find the right tutor and indicate your interest</p>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Browse Tutors</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Find the right tutor and indicate your interest</p>
       </div>
 
       {/* Search */}
-      <div className="relative mb-6 max-w-sm">
+      <div className="relative mb-6 w-full sm:max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <input
           type="text"
@@ -74,23 +74,23 @@ export default function BrowseTutors({ student, notify }) {
                     {tutor.name?.[0]?.toUpperCase() ?? '?'}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-slate-900 truncate">{tutor.name}</p>
-                    <p className="text-xs text-slate-400 truncate">Tutor #{tutor.tutor_id}</p>
+                    <p className="font-medium text-slate-900 dark:text-white truncate">{tutor.name}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 truncate">Tutor #{tutor.tutor_id}</p>
                   </div>
                 </div>
 
                 {/* Subject & rate */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-slate-600">
-                    <BookOpen className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <BookOpen className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                     <span>{tutor.subject ?? 'General'}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-600">
-                    <DollarSign className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <DollarSign className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                     <span>SGD {tutor.rate ?? '–'} / hr</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-600">
-                    <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <Mail className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                     <span className="truncate">{tutor.contact_info ?? '–'}</span>
                   </div>
                 </div>
@@ -113,19 +113,19 @@ export default function BrowseTutors({ student, notify }) {
         onClose={() => setSelected(null)}
         title="Indicate Interest"
       >
-        <p className="text-sm text-slate-600 mb-5">
+        <p className="text-sm text-slate-600 dark:text-slate-300 mb-5">
           You're about to express interest in{' '}
-          <span className="font-semibold text-slate-900">{selected?.name}</span>.
+          <span className="font-semibold text-slate-900 dark:text-white">{selected?.name}</span>.
           They'll receive an email notification.
         </p>
-        <div className="bg-slate-50 rounded-xl p-4 text-xs space-y-2 mb-6">
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-xs space-y-2 mb-6">
           <div className="flex justify-between">
-            <span className="text-slate-500">Subject</span>
-            <span className="font-medium text-slate-700">{selected?.subject}</span>
+            <span className="text-slate-500 dark:text-slate-400">Subject</span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">{selected?.subject}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Rate</span>
-            <span className="font-medium text-slate-700">SGD {selected?.rate}/hr</span>
+            <span className="text-slate-500 dark:text-slate-400">Rate</span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">SGD {selected?.rate}/hr</span>
           </div>
         </div>
         <div className="flex gap-3">

@@ -15,8 +15,8 @@ function PasswordStrength({ password }) {
   return (
     <div className="mt-2 space-y-1">
       {checks.map(({ label, ok }) => (
-        <div key={label} className={`flex items-center gap-2 text-xs ${ok ? 'text-green-700' : 'text-slate-400'}`}>
-          <CheckCircle2 className={`h-3 w-3 ${ok ? 'text-green-600' : 'text-slate-300'}`} />
+        <div key={label} className={`flex items-center gap-2 text-xs ${ok ? 'text-green-700 dark:text-green-400' : 'text-slate-400 dark:text-slate-500'}`}>
+          <CheckCircle2 className={`h-3 w-3 ${ok ? 'text-green-600 dark:text-green-400' : 'text-slate-300 dark:text-slate-600'}`} />
           {label}
         </div>
       ))}
@@ -111,27 +111,29 @@ export default function Register() {
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-white overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12 bg-white dark:bg-slate-900 overflow-y-auto">
         <div className="w-full max-w-sm">
           <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="h-7 w-7 rounded-lg bg-green-800 flex items-center justify-center">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="font-bold text-slate-900 tracking-tight">TutorMatch</span>
+            <span className="font-bold text-slate-900 dark:text-white tracking-tight">TutorMatch</span>
           </Link>
 
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">Create your account</h1>
-          <p className="text-sm text-slate-500 mb-6">Get started — it's free</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Create your account</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Get started — it's free</p>
 
           {/* Role toggle */}
-          <div className="flex gap-2 mb-6 p-1 bg-slate-100 rounded-lg">
+          <div className="flex gap-2 mb-6 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
             {['student', 'tutor'].map(r => (
               <button
                 key={r}
                 type="button"
                 onClick={() => set('role', r)}
                 className={`flex-1 py-2 text-xs font-medium rounded-md transition-colors capitalize
-                  ${form.role === r ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  ${form.role === r
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
               >
                 I'm a {r}
               </button>
@@ -157,7 +159,7 @@ export default function Register() {
               <label className="label">{form.role === 'student' ? 'Student' : 'Tutor'} ID</label>
               <input type="number" min="1" placeholder={`Your ${form.role} ID in the system`}
                 value={form.id} onChange={e => set('id', e.target.value)} className="input" />
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
                 This links your account to your existing {form.role} profile.
               </p>
               {fieldErrors.id && <p className="text-xs text-red-500 mt-1">{fieldErrors.id}</p>}
@@ -170,7 +172,7 @@ export default function Register() {
                   autoComplete="new-password"
                   value={form.password} onChange={e => set('password', e.target.value)} className="input pr-10" />
                 <button type="button" onClick={() => setShowPw(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
                   {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -196,9 +198,9 @@ export default function Register() {
             </button>
           </form>
 
-          <p className="text-xs text-slate-500 text-center mt-6">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-green-700 font-medium hover:underline">Sign in</Link>
+            <Link to="/login" className="text-green-700 dark:text-green-400 font-medium hover:underline">Sign in</Link>
           </p>
         </div>
       </div>

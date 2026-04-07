@@ -65,8 +65,8 @@ export default function TutorTrials({ tutor, notify }) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">My Trials</h2>
-          <p className="text-sm text-slate-500 mt-1">Manage your scheduled trial lessons</p>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">My Trials</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your scheduled trial lessons</p>
         </div>
         <button onClick={load} className="btn-secondary">
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
@@ -93,10 +93,10 @@ export default function TutorTrials({ tutor, notify }) {
                       {studentName(student)?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 text-sm">
+                      <p className="font-medium text-slate-900 dark:text-white text-sm">
                         {studentName(student) !== '–' ? studentName(student) : `Student #${trial.student_id}`}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-slate-400 dark:text-slate-500">
                         {studentEmail(student)} · Trial #{trial.trial_id}
                       </p>
                     </div>
@@ -104,25 +104,25 @@ export default function TutorTrials({ tutor, notify }) {
                   <Badge status={trial.status} />
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 bg-slate-50 rounded-xl p-3 mb-4 text-xs">
+                <div className="grid grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl p-3 mb-4 text-xs">
                   <div>
-                    <p className="text-slate-400 mb-0.5">Date</p>
-                    <p className="font-medium text-slate-700">{fmt(trial.trial_date)}</p>
+                    <p className="text-slate-400 dark:text-slate-500 mb-0.5">Date</p>
+                    <p className="font-medium text-slate-700 dark:text-slate-200">{fmt(trial.trial_date)}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 mb-0.5">Time</p>
-                    <p className="font-medium text-slate-700">
+                    <p className="text-slate-400 dark:text-slate-500 mb-0.5">Time</p>
+                    <p className="font-medium text-slate-700 dark:text-slate-200">
                       {trial.start_time?.slice(0, 5)} – {trial.end_time?.slice(0, 5)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-slate-400 mb-0.5">Subject</p>
-                    <p className="font-medium text-slate-700">{trial.subject ?? tutor.subject ?? '–'}</p>
+                    <p className="text-slate-400 dark:text-slate-500 mb-0.5">Subject</p>
+                    <p className="font-medium text-slate-700 dark:text-slate-200">{trial.subject ?? tutor.subject ?? '–'}</p>
                   </div>
                 </div>
 
                 {trial.notes && (
-                  <p className="text-xs text-slate-500 mb-4 italic">"{trial.notes}"</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 italic">"{trial.notes}"</p>
                 )}
 
                 {isCancellable && (
@@ -140,11 +140,11 @@ export default function TutorTrials({ tutor, notify }) {
       <Modal open={!!cancelTarget} onClose={() => setCancelTarget(null)} title="Cancel Trial & Refund">
         {cancelTarget && (
           <>
-            <p className="text-sm text-slate-600 mb-4">
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
               Are you sure you want to cancel Trial #{cancelTarget.trial_id}?
               The student will be notified and <strong>SGD 50 in credits</strong> will be refunded to them.
             </p>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700 mb-5">
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-xs text-amber-700 dark:text-amber-400 mb-5">
               This action cannot be undone. The student will receive an email notification.
             </div>
             <div className="flex gap-3">
