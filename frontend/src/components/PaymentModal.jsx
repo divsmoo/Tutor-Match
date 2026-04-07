@@ -89,31 +89,31 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden">
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 w-full max-w-md overflow-hidden">
 
         {/* ── Success state ─────────────────────────────────── */}
         {state === 'success' && (
           <div className="p-8 text-center">
-            <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
-              <CheckCircle2 className="h-8 w-8 text-green-700" />
+            <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center mx-auto mb-5">
+              <CheckCircle2 className="h-8 w-8 text-green-700 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Payment Confirmed!</h3>
-            <p className="text-sm text-slate-500 mb-4">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Payment Confirmed!</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
               Your trial with <strong>{tutorName}</strong> is now confirmed.
               A confirmation email has been sent to you and your tutor.
             </p>
-            <div className="bg-slate-50 rounded-xl p-4 text-xs space-y-2 mb-6 text-left">
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-xs space-y-2 mb-6 text-left">
               <div className="flex justify-between">
-                <span className="text-slate-500">Amount charged</span>
-                <span className="font-semibold text-slate-900">SGD {amount}</span>
+                <span className="text-slate-500 dark:text-slate-400">Amount charged</span>
+                <span className="font-semibold text-slate-900 dark:text-white">SGD {amount}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Transaction ID</span>
-                <span className="font-mono font-medium text-slate-700">{txnId}</span>
+                <span className="text-slate-500 dark:text-slate-400">Transaction ID</span>
+                <span className="font-mono font-medium text-slate-700 dark:text-slate-200">{txnId}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Status</span>
-                <span className="text-green-700 font-medium">Success</span>
+                <span className="text-slate-500 dark:text-slate-400">Status</span>
+                <span className="text-green-700 dark:text-green-400 font-medium">Success</span>
               </div>
             </div>
             <button onClick={handleClose} className="btn-primary w-full justify-center">
@@ -126,42 +126,42 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
         {state !== 'success' && (
           <>
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
               <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-green-700" />
-                <h3 className="text-sm font-semibold text-slate-900">Secure Payment</h3>
+                <Lock className="h-4 w-4 text-green-700 dark:text-green-400" />
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Secure Payment</h3>
               </div>
               <button onClick={handleClose} disabled={state === 'processing'}
-                className="text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-colors">
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-30 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="px-6 py-5 space-y-5">
               {/* Order summary */}
-              <div className="bg-slate-50 rounded-xl p-4 text-xs space-y-2">
-                <p className="font-medium text-slate-700 mb-2">Order Summary</p>
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-xs space-y-2">
+                <p className="font-medium text-slate-700 dark:text-slate-200 mb-2">Order Summary</p>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Trial with</span>
-                  <span className="font-medium text-slate-800">{tutorName}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Trial with</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">{tutorName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Date</span>
-                  <span className="font-medium text-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Date</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
                     {trial?.trial_date ? new Date(trial.trial_date).toLocaleDateString('en-SG', {
                       day: 'numeric', month: 'short', year: 'numeric'
                     }) : '–'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Time</span>
-                  <span className="font-medium text-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Time</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
                     {trial?.start_time?.slice(0,5)} – {trial?.end_time?.slice(0,5)}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-slate-200 mt-1">
-                  <span className="font-semibold text-slate-800">Total</span>
-                  <span className="font-bold text-slate-900 text-sm">SGD {amount}</span>
+                <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-600 mt-1">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">Total</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">SGD {amount}</span>
                 </div>
               </div>
 
@@ -183,9 +183,9 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
                       value={form.number}
                       onChange={e => set('number', formatCardNumber(e.target.value))}
                       disabled={state === 'processing'} className="input pr-20" />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-slate-400">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
                       {cardType
-                        ? <span className="font-medium text-slate-600">{cardType}</span>
+                        ? <span className="font-medium text-slate-600 dark:text-slate-300">{cardType}</span>
                         : <CreditCard className="h-4 w-4" />}
                     </div>
                   </div>
@@ -215,14 +215,14 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
 
               {/* API error */}
               {state === 'error' && apiError && (
-                <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700">
+                <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-xs text-red-700 dark:text-red-400">
                   <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>{apiError}</span>
                 </div>
               )}
 
               {/* Security note */}
-              <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
                 <Lock className="h-3 w-3" />
                 <span>Your payment information is encrypted and secure</span>
               </div>

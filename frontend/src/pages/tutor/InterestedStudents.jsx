@@ -72,8 +72,8 @@ export default function InterestedStudents({ tutor, notify }) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">Interested Students</h2>
-          <p className="text-sm text-slate-500 mt-1">Students who have indicated interest in your tutoring</p>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Interested Students</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Students who have indicated interest in your tutoring</p>
         </div>
         <button onClick={load} className="btn-secondary">
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
@@ -97,18 +97,18 @@ export default function InterestedStudents({ tutor, notify }) {
                     {studentName(student)?.[0]?.toUpperCase() ?? '?'}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-slate-900 truncate">{studentName(student)}</p>
-                    <p className="text-xs text-slate-400">Student #{student.student_id}</p>
+                    <p className="font-medium text-slate-900 dark:text-white truncate">{studentName(student)}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Student #{student.student_id}</p>
                   </div>
                 </div>
 
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <Mail className="h-3.5 w-3.5 text-slate-400" />
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                    <Mail className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
                     <span className="truncate">{studentEmail(student)}</span>
                   </div>
                   {interest && (
-                    <div className="text-slate-400">
+                    <div className="text-slate-400 dark:text-slate-500">
                       Requested {new Date(interest.created).toLocaleDateString('en-SG', {
                         day: 'numeric', month: 'short'
                       })}
@@ -129,7 +129,7 @@ export default function InterestedStudents({ tutor, notify }) {
       <Modal open={!!selected} onClose={() => setSelected(null)} title="Accept Student & Schedule Trial">
         {selected && (
           <form onSubmit={handleAccept} className="space-y-4">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               Schedule a trial lesson with <strong>{studentName(selected.student)}</strong>.
               They'll receive an email with the details.
             </p>

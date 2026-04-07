@@ -96,8 +96,8 @@ export default function MyTrials({ student, notify }) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">My Trials</h2>
-          <p className="text-sm text-slate-500 mt-1">Manage your trial bookings and lessons</p>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">My Trials</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your trial bookings and lessons</p>
         </div>
         <button onClick={load} className="btn-secondary">
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
@@ -126,29 +126,29 @@ export default function MyTrials({ student, notify }) {
                       {tutor?.name?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 text-sm">
+                      <p className="font-medium text-slate-900 dark:text-white text-sm">
                         {tutor?.name ?? `Tutor #${trial.tutor_id}`}
                       </p>
-                      <p className="text-xs text-slate-400">{tutor?.subject ?? '–'} · Trial #{trial.trial_id}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">{tutor?.subject ?? '–'} · Trial #{trial.trial_id}</p>
                     </div>
                   </div>
                   <Badge status={trial.status} />
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 bg-slate-50 rounded-xl p-3 mb-4 text-xs">
+                <div className="grid grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl p-3 mb-4 text-xs">
                   <div>
-                    <p className="text-slate-400 mb-0.5">Date</p>
-                    <p className="font-medium text-slate-700">{fmt(trial.trial_date)}</p>
+                    <p className="text-slate-400 dark:text-slate-500 mb-0.5">Date</p>
+                    <p className="font-medium text-slate-700 dark:text-slate-200">{fmt(trial.trial_date)}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 mb-0.5">Time</p>
-                    <p className="font-medium text-slate-700">
+                    <p className="text-slate-400 dark:text-slate-500 mb-0.5">Time</p>
+                    <p className="font-medium text-slate-700 dark:text-slate-200">
                       {trial.start_time?.slice(0, 5)} – {trial.end_time?.slice(0, 5)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-slate-400 mb-0.5">Rate</p>
-                    <p className="font-medium text-slate-700">SGD {tutor?.rate ?? '–'}/hr</p>
+                    <p className="text-slate-400 dark:text-slate-500 mb-0.5">Rate</p>
+                    <p className="font-medium text-slate-700 dark:text-slate-200">SGD {tutor?.rate ?? '–'}/hr</p>
                   </div>
                 </div>
 
@@ -189,7 +189,7 @@ export default function MyTrials({ student, notify }) {
       <Modal open={modal?.type === 'continue'} onClose={() => setModal(null)} title="Continue Lessons">
         {modal?.trial && (
           <>
-            <p className="text-sm text-slate-600 mb-5">
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-5">
               Let <strong>{tutorMap[modal.trial.tutor_id]?.name}</strong> know you'd like to continue regular lessons.
               They'll receive a notification.
             </p>
@@ -207,7 +207,7 @@ export default function MyTrials({ student, notify }) {
       <Modal open={modal?.type === 'cancel'} onClose={() => setModal(null)} title="Cancel Booking">
         {modal?.trial && (
           <>
-            <p className="text-sm text-slate-600 mb-5">
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-5">
               Are you sure you want to cancel your trial with{' '}
               <strong>{tutorMap[modal.trial.tutor_id]?.name}</strong>? They'll be notified immediately.
             </p>

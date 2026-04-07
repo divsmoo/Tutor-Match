@@ -74,18 +74,18 @@ export default function Login() {
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-white">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-white dark:bg-slate-900">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="h-7 w-7 rounded-lg bg-green-800 flex items-center justify-center">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="font-bold text-slate-900 tracking-tight">TutorMatch</span>
+            <span className="font-bold text-slate-900 dark:text-white tracking-tight">TutorMatch</span>
           </Link>
 
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h1>
-          <p className="text-sm text-slate-500 mb-8">Sign in to your account to continue</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Welcome back</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">Sign in to your account to continue</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -103,7 +103,7 @@ export default function Login() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="label mb-0">Password</label>
-                <button type="button" className="text-xs text-slate-400 hover:text-green-700 transition-colors">
+                <button type="button" className="text-xs text-slate-400 hover:text-green-700 dark:hover:text-green-400 transition-colors">
                   Forgot password?
                 </button>
               </div>
@@ -117,7 +117,7 @@ export default function Login() {
                   className="input pr-10"
                 />
                 <button type="button" onClick={() => setShowPw(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
                   {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -134,9 +134,9 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-xs text-slate-500 text-center mt-6">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-green-700 font-medium hover:underline">Create one here</Link>
+            <Link to="/register" className="text-green-700 dark:text-green-400 font-medium hover:underline">Create one here</Link>
           </p>
         </div>
       </div>
