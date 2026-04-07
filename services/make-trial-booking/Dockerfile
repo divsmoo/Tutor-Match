@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5001
+EXPOSE 5013
 
-CMD ["python", "tutor.py"]
+CMD ["python", "make-trial-booking.py"]

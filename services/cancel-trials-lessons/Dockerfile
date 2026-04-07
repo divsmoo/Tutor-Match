@@ -7,6 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5001
+ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "tutor.py"]
+EXPOSE 5016
+
+CMD ["python", "cancel-trial-lessons.py"]

@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5004
+EXPOSE 5015
 
-CMD ["python", "app.py"]
+CMD ["python", "cancel_trial_booking.py"]

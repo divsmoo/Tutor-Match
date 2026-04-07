@@ -9,4 +9,6 @@ COPY . .
 
 EXPOSE 5006
 
-CMD ["python", "app.py"]
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "notification.py"]
