@@ -65,6 +65,15 @@ export const acceptStudent = (payload) =>
   post(SVC.acceptStudent, '/accept-student', payload)
 
 // ── Scenario 2b: Student confirms trial & pays ──────────────────
+// Step 1: Create Stripe PaymentIntent, get client_secret back
+export const initiatePayment = (payload) =>
+  post(SVC.makeTrialBooking, '/initiate-payment', payload)
+
+// Step 2: After Stripe confirms card on frontend, finalise booking
+export const confirmBooking = (payload) =>
+  post(SVC.makeTrialBooking, '/confirm-booking', payload)
+
+// Legacy single-step (kept for compatibility)
 export const makeTrialBooking = (payload) =>
   post(SVC.makeTrialBooking, '/make-trial-booking', payload)
 

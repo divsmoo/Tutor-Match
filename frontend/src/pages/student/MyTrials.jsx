@@ -5,7 +5,7 @@ import Badge from '../../components/Badge'
 import EmptyState from '../../components/EmptyState'
 import Modal from '../../components/Modal'
 import PaymentModal from '../../components/PaymentModal'
-import { getAllTrials, getTutor, makeTrialBooking, continueLessons, cancelTrialBooking } from '../../lib/api'
+import { getAllTrials, getTutor, continueLessons, cancelTrialBooking } from '../../lib/api'
 
 function fmt(dateStr) {
   if (!dateStr) return '–'
@@ -42,18 +42,11 @@ export default function MyTrials({ student, notify }) {
 
   useEffect(() => { load() }, [student.student_id])
 
-  // ── Scenario 2b — called by PaymentModal after card entry ───
-  async function handlePayment(trial) {
-    const res = await makeTrialBooking({
-      student_id: trial.student_id,
-      tutor_id:   trial.tutor_id,
-      trial_id:   trial.trial_id,
-      trial_date: trial.trial_date,
-      start_time: trial.start_time,
-      end_time:   trial.end_time,
-    })
-    load()   // refresh list in background
-    return res
+  // ── Scenario 2b — called by PaymentModal after Stripe confirms ──
+  function handleBooked() {
+    notify('Payment confirmed! Your trial is now booked.')
+    setPayTrial(null)
+    load()
   }
 
   // ── Scenario 2c ─────────────────────────────────────────────
@@ -182,7 +175,7 @@ export default function MyTrials({ student, notify }) {
         trial={payTrial}
         tutorName={payTrial ? tutorMap[payTrial.tutor_id]?.name : ''}
         tutorRate={payTrial ? tutorMap[payTrial.tutor_id]?.rate : ''}
-        onSuccess={handlePayment}
+        onBooked={handleBooked}
       />
 
       {/* Continue Lessons Modal */}
