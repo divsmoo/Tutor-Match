@@ -71,7 +71,7 @@ export default function Register() {
     }
 
     try {
-      register({ name: form.name.trim(), email: form.email.trim(), password: form.password, role: form.role, id: form.id })
+      await register({ name: form.name.trim(), email: form.email.trim(), password: form.password, role: form.role, id: form.id })
       navigate('/login', { state: { registered: true, email: form.email.trim() } })
     } catch (err) {
       setError(err.message)

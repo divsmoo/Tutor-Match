@@ -20,7 +20,7 @@ export default function Login() {
 
     setLoading(true)
     try {
-      const session = login({ email: form.email.trim(), password: form.password })
+      const session = await login({ email: form.email.trim(), password: form.password })
 
       // Fetch full profile from backend
       let profile

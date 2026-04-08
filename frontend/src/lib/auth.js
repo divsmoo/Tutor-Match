@@ -1,40 +1,35 @@
-const ACCOUNTS_KEY = 'tm_accounts'
-const SESSION_KEY  = 'tm_session'
+import { supabase } from './supabase'
 
-function encode(str) { return btoa(unescape(encodeURIComponent(str))) }
-function decode(str) { return decodeURIComponent(escape(atob(str))) }
+const SESSION_KEY = 'tm_session'
 
-function getAccounts() {
-  try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) ?? '[]') } catch { return [] }
+export async function register({ name, email, password, role, id }) {
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { name, role, id: parseInt(id, 10) },
+    },
+  })
+  if (error) throw new Error(error.message)
 }
 
-function saveAccounts(list) {
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(list))
-}
+export async function login({ email, password }) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) throw new Error(error.message)
 
-export function register({ name, email, password, role, id }) {
-  const accounts = getAccounts()
-  if (accounts.find(a => a.email.toLowerCase() === email.toLowerCase())) {
-    throw new Error('An account with this email already exists.')
+  const meta = data.user.user_metadata
+  const session = {
+    name: meta.name,
+    email: data.user.email,
+    role: meta.role,
+    id: meta.id,
   }
-  const account = { name, email: email.toLowerCase(), password: encode(password), role, id: parseInt(id, 10) }
-  accounts.push(account)
-  saveAccounts(accounts)
-  return account
-}
-
-export function login({ email, password }) {
-  const accounts = getAccounts()
-  const account = accounts.find(a => a.email === email.toLowerCase())
-  if (!account) throw new Error('No account found with this email address.')
-  if (account.password !== encode(password)) throw new Error('Incorrect password. Please try again.')
-  const session = { ...account }
-  delete session.password
   localStorage.setItem(SESSION_KEY, JSON.stringify(session))
   return session
 }
 
-export function logout() {
+export async function logout() {
+  await supabase.auth.signOut()
   localStorage.removeItem(SESSION_KEY)
 }
 
