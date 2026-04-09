@@ -271,7 +271,7 @@ services:
   kong-migration:
     image: kong/kong-gateway:3.9
     command: "kong migrations bootstrap"
-    restart: always
+    restart: "no"
     environment:
       KONG_DATABASE: postgres
       KONG_PG_HOST: kong-database
