@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Users, Mail, RefreshCw, CheckCircle2, CalendarCheck } from 'lucide-react'
+import { Users, RefreshCw, CheckCircle2, CalendarCheck } from 'lucide-react'
 import Spinner from '../../components/Spinner'
 import EmptyState from '../../components/EmptyState'
 import Modal from '../../components/Modal'
-import { getInterestedStudents, getInterestsByTutor, acceptStudent, studentName, studentEmail } from '../../lib/api'
+import { getInterestedStudents, getInterestsByTutor, acceptStudent, studentName } from '../../lib/api'
 
 export default function InterestedStudents({ tutor, notify }) {
   const [students, setStudents]   = useState([])
@@ -103,10 +103,6 @@ export default function InterestedStudents({ tutor, notify }) {
                 </div>
 
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                    <Mail className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                    <span className="truncate">{studentEmail(student)}</span>
-                  </div>
                   {interest && (
                     <div className="text-slate-400 dark:text-slate-500">
                       Requested {new Date(interest.created).toLocaleDateString('en-SG', {
