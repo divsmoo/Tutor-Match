@@ -33,8 +33,8 @@ export default function TutorApp() {
 
   const notify = (message, type = 'success') => setToast({ message, type })
 
-  function handleLogout() {
-    logout()
+  async function handleLogout() {
+    await logout()
     navigate('/')
   }
 
