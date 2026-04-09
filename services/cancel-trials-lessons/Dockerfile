@@ -7,8 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5006
-
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "notification.py"]
+EXPOSE 5016
+
+CMD ["python", "cancel-trial-lessons.py"]

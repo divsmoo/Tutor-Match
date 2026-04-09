@@ -1,10 +1,11 @@
-version: "3.8"
-
 # ─────────────────────────────────────────────────────────────
 # ESD G7T1 — Tutor Matching Platform
 # Supabase (PostgreSQL) is hosted remotely — no local DB needed
 # ─────────────────────────────────────────────────────────────
 
+## volume for kong database persistence 
+volumes:
+  kong_data:
 services:
 
   # ── Message Broker ──────────────────────────────────────────
@@ -21,7 +22,8 @@ services:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 15
+      start_period: 60s
 
   # ── Atomic Services ─────────────────────────────────────────
   tutor:
@@ -60,9 +62,9 @@ services:
         condition: service_healthy
     restart: on-failure
 
-  booking:
-    build: ./services/booking
-    container_name: booking
+  trials:
+    build: ./services/trials
+    container_name: trials
     ports:
       - "5004:5004"
     env_file:
@@ -113,7 +115,7 @@ services:
     build: ./services/indicate-interest
     container_name: indicate-interest
     ports:
-      - "5010:5010"
+      - "5010:5010" 
     env_file:
       - .env
     depends_on:
@@ -122,6 +124,66 @@ services:
       tutor:
         condition: service_started
       interest:
+        condition: service_started
+    restart: on-failure
+
+  continue-lessons:
+    build: ./services/continue-lessons
+    container_name: continue-lessons
+    ports:
+      - "5014:5014"
+    environment:
+      - TRIALS_SERVICE_URL=http://trials:5004
+      - TUTOR_SERVICE_URL=http://tutor:5001
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      trials:
+        condition: service_started
+      tutor:
+        condition: service_started
+    restart: on-failure
+
+  cancel-trial-booking:
+    build: ./services/cancel-trial-booking
+    container_name: cancel-trial-booking
+    ports:
+      - "5015:5015"
+    environment:
+      - TRIALS_SERVICE_URL=http://trials:5004
+      - TUTOR_SERVICE_URL=http://tutor:5001
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      trials:
+        condition: service_started
+      tutor:
+        condition: service_started
+    restart: on-failure
+
+  cancel-trial-lessons:
+    build: ./services/cancel-trials-lessons
+    container_name: cancel-trial-lessons
+    ports:
+      - "5016:5016"
+    environment:
+      - TRIALS_SERVICE_URL=http://trials:5004
+      - CREDIT_SERVICE_URL=http://credit:5007
+      - STUDENT_SERVICE_URL=http://student:5002
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      trials:
+        condition: service_started
+      credit:
+        condition: service_started
+      student:
         condition: service_started
     restart: on-failure
 
@@ -143,3 +205,134 @@ services:
       interest:
         condition: service_started
     restart: on-failure
+
+  accept-student:
+    build: ./services/accept-student
+    container_name: accept-student
+    ports:
+      - "5012:5012"
+    environment:
+      - INTEREST_SERVICE_URL=http://interest:5003
+      - TRIALS_SERVICE_URL=http://trials:5004
+      - STUDENT_SERVICE_URL=http://student:5002
+      - TUTOR_SERVICE_URL=http://tutor:5001
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      interest:
+        condition: service_started
+      student:
+        condition: service_started
+      tutor:
+        condition: service_started
+      trials:
+        condition: service_started
+    restart: on-failure
+
+  make-trial-booking:
+    build: ./services/make-trial-booking
+    container_name: make-trial-booking
+    ports:
+      - "5013:5013"
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      tutor:
+        condition: service_started
+      interest:
+        condition: service_started
+    restart: on-failure
+
+  # ── Monitoring (BTL) ────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: on-failure
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    container_name: blackbox-exporter
+    ports:
+      - "9115:9115"
+    restart: on-failure
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: on-failure
+
+  #######################################
+  # Postgres: The database used by Kong
+  #######################################
+  kong-database:
+    image: postgres:17.4
+    restart: always
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: password
+    volumes:
+      - kong_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  #######################################
+  # Kong database migration
+  #######################################
+  kong-migration:
+    image: kong/kong-gateway:3.9
+    command: "kong migrations bootstrap"
+    restart: "no"
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: password
+    depends_on:
+      - kong-database
+
+  #######################################
+  # Kong: The API Gateway
+  #######################################
+  kong:
+    image: kong/kong-gateway:3.9
+    restart: always
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: password
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+    depends_on:
+      - kong-migration
+    ports: # https://docs.konghq.com/gateway/latest/production/networking/default-ports/
+      - "8000:8000" # Takes incoming HTTP traffic from Consumers, and forwards it to upstream Services.
+      - "8001:8001" # Admin API. Listens for calls from the command line over HTTP.
+      - "8002:8002" # Kong Manager (GUI). Listens for HTTP traffic.
