@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import StudentApp from './pages/student/StudentApp'
 import TutorApp from './pages/tutor/TutorApp'
+import Status from './pages/Status'
 import { getSession } from './lib/auth'
 
 function RequireAuth({ children, role }) {
@@ -21,6 +22,7 @@ export default function App() {
       <Route path="/register"  element={<Register />} />
       <Route path="/student/*" element={<RequireAuth role="student"><StudentApp /></RequireAuth>} />
       <Route path="/tutor/*"   element={<RequireAuth role="tutor"><TutorApp /></RequireAuth>} />
+      <Route path="/status"    element={<Status />} />
       <Route path="*"          element={<Navigate to="/" replace />} />
     </Routes>
   )

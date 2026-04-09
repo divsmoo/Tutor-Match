@@ -336,3 +336,15 @@ services:
       - "8000:8000" # Takes incoming HTTP traffic from Consumers, and forwards it to upstream Services.
       - "8001:8001" # Admin API. Listens for calls from the command line over HTTP.
       - "8002:8002" # Kong Manager (GUI). Listens for HTTP traffic.
+
+  #######################################
+  # Kong setup: registers services, routes, key-auth
+  #######################################
+  kong-setup:
+    image: curlimages/curl:latest
+    entrypoint: ["/bin/sh", "/kong/setup.sh"]
+    volumes:
+      - ./kong:/kong:ro
+    depends_on:
+      - kong
+    restart: on-failure

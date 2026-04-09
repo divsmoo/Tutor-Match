@@ -15,8 +15,8 @@ function PasswordStrength({ password }) {
   return (
     <div className="mt-2 space-y-1">
       {checks.map(({ label, ok }) => (
-        <div key={label} className={`flex items-center gap-2 text-xs ${ok ? 'text-green-700 dark:text-green-400' : 'text-slate-400 dark:text-slate-500'}`}>
-          <CheckCircle2 className={`h-3 w-3 ${ok ? 'text-green-600 dark:text-green-400' : 'text-slate-300 dark:text-slate-600'}`} />
+        <div key={label} className={`flex items-center gap-2 text-xs ${ok ? 'text-blue-700 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`}>
+          <CheckCircle2 className={`h-3 w-3 ${ok ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-600'}`} />
           {label}
         </div>
       ))}
@@ -83,7 +83,7 @@ export default function Register() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
-      <div className="hidden lg:flex w-1/2 bg-slate-900 flex-col justify-between p-12">
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-900 to-blue-700 flex-col justify-between p-12">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center">
             <Sparkles className="h-4 w-4 text-white" />
@@ -97,7 +97,7 @@ export default function Register() {
             { title: 'Seamless Payments',           desc: 'Secure payment handling built right in.' },
           ].map(({ title, desc }) => (
             <div key={title} className="flex items-start gap-3">
-              <div className="h-6 w-6 rounded-full bg-green-700 flex items-center justify-center shrink-0 mt-0.5">
+              <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center shrink-0 mt-0.5">
                 <CheckCircle2 className="h-3.5 w-3.5 text-white" />
               </div>
               <div>
@@ -107,14 +107,14 @@ export default function Register() {
             </div>
           ))}
         </div>
-        <p className="text-slate-600 text-xs">© 2026 TutorMatch · ESD G7T1</p>
+        <p className="text-blue-300 text-xs">© 2026 TutorMatch · ESD G7T1</p>
       </div>
 
       {/* Right panel */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12 bg-white dark:bg-slate-900 overflow-y-auto">
         <div className="w-full max-w-sm">
           <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="h-7 w-7 rounded-lg bg-green-800 flex items-center justify-center">
+            <div className="h-7 w-7 rounded-lg bg-blue-700 flex items-center justify-center">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
             <span className="font-bold text-slate-900 dark:text-white tracking-tight">TutorMatch</span>
@@ -200,7 +200,7 @@ export default function Register() {
 
           <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-green-700 dark:text-green-400 font-medium hover:underline">Sign in</Link>
+            <Link to="/login" className="text-blue-700 dark:text-blue-400 font-medium hover:underline">Sign in</Link>
           </p>
         </div>
       </div>

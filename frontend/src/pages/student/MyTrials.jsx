@@ -42,19 +42,19 @@ function StatusTimeline({ status }) {
           <div key={label} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1">
               <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold ring-2 transition-colors ${
-                done    ? 'bg-green-700 text-white ring-green-700' :
-                current ? 'bg-white dark:bg-slate-800 text-green-700 ring-green-700' :
+                done    ? 'bg-blue-700 text-white ring-blue-700' :
+                current ? 'bg-white dark:bg-slate-800 text-blue-700 ring-blue-700' :
                           'bg-slate-100 dark:bg-slate-700 text-slate-400 ring-slate-200 dark:ring-slate-600'
               }`}>
                 {done ? '✓' : i + 1}
               </div>
               <span className={`text-[10px] whitespace-nowrap font-medium ${
-                done || current ? 'text-green-700 dark:text-green-400' : 'text-slate-400 dark:text-slate-500'
+                done || current ? 'text-blue-700 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
               }`}>{label}</span>
             </div>
             {i < STEPS.length - 1 && (
               <div className={`flex-1 h-0.5 mx-1 mb-4 transition-colors ${
-                i < step ? 'bg-green-700' : 'bg-slate-200 dark:bg-slate-600'
+                i < step ? 'bg-blue-700' : 'bg-slate-200 dark:bg-slate-600'
               }`} />
             )}
           </div>
@@ -209,7 +209,7 @@ export default function MyTrials({ student, notify }) {
               <div key={trial.trial_id} className="card p-5">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
                       {tutor?.name?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>

@@ -15,7 +15,7 @@ function ProfileModal({ tutor, onClose, onInterest, submitting }) {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 w-full max-w-md overflow-hidden">
         {/* Header banner */}
-        <div className="h-20 bg-gradient-to-r from-green-700 to-teal-600" />
+        <div className="h-20 bg-gradient-to-r from-blue-600 to-indigo-600" />
         <button onClick={onClose} className="absolute top-3 right-3 text-white/80 hover:text-white transition-colors">
           <X className="h-5 w-5" />
         </button>
@@ -23,7 +23,7 @@ function ProfileModal({ tutor, onClose, onInterest, submitting }) {
         <div className="px-6 pb-6">
           {/* Avatar */}
           <div className="-mt-8 mb-4 flex items-end justify-between">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-white dark:ring-slate-800 shadow-lg">
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold ring-4 ring-white dark:ring-slate-800 shadow-lg">
               {tutor.name?.[0]?.toUpperCase() ?? '?'}
             </div>
             <span className="text-xs text-slate-400 dark:text-slate-500">ID #{tutor.tutor_id}</span>
@@ -32,7 +32,7 @@ function ProfileModal({ tutor, onClose, onInterest, submitting }) {
           <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{tutor.name}</h2>
 
           {/* Subject pill */}
-          <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-700 mb-4">
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-700 mb-4">
             <BookOpen className="h-3 w-3" /> {tutor.subject ?? 'General'}
           </span>
 
@@ -143,12 +143,12 @@ export default function BrowseTutors({ student, notify }) {
         </div>
         <button
           onClick={() => setShowFilters(f => !f)}
-          className={`btn-secondary relative ${showFilters ? 'ring-2 ring-green-600' : ''}`}
+          className={`btn-secondary relative ${showFilters ? 'ring-2 ring-blue-600' : ''}`}
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filters
           {activeFilters > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-green-700 text-white text-[10px] font-bold flex items-center justify-center">
+            <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-blue-700 text-white text-[10px] font-bold flex items-center justify-center">
               {activeFilters}
             </span>
           )}
@@ -167,8 +167,8 @@ export default function BrowseTutors({ student, notify }) {
                   onClick={() => setSubject(s)}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
                     subjectFilter === s
-                      ? 'bg-green-700 text-white border-green-700'
-                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-green-400'
+                      ? 'bg-blue-700 text-white border-blue-700'
+                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-blue-400'
                   }`}
                 >
                   {s}
@@ -185,7 +185,7 @@ export default function BrowseTutors({ student, notify }) {
               step={10}
               value={maxRate}
               onChange={e => setMaxRate(Number(e.target.value))}
-              className="w-full accent-green-700"
+              className="w-full accent-blue-700"
             />
             <div className="flex justify-between text-xs text-slate-400 mt-1">
               <span>SGD 0</span><span>SGD {maxPossibleRate}</span>
@@ -207,7 +207,7 @@ export default function BrowseTutors({ student, notify }) {
               <div key={tutor.tutor_id} className="card p-5 flex flex-col gap-4 hover:shadow-md transition-shadow group">
                 {/* Avatar + name */}
                 <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
                     {tutor.name?.[0]?.toUpperCase() ?? '?'}
                   </div>
                   <div className="min-w-0 flex-1">

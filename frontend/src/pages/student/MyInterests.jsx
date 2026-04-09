@@ -62,7 +62,7 @@ export default function MyInterests({ student }) {
               <div key={interest.interest_id} className="card p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
                       {tutor?.name?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>

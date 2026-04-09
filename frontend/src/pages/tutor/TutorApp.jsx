@@ -51,7 +51,7 @@ export default function TutorApp() {
       <header className="bg-white border-b border-slate-100 sticky top-0 z-30 dark:bg-slate-800 dark:border-slate-700">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-lg bg-green-800 flex items-center justify-center">
+            <div className="h-7 w-7 rounded-lg bg-blue-700 flex items-center justify-center">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
             <span className="font-semibold text-slate-900 text-sm tracking-tight dark:text-white">TutorMatch</span>
@@ -64,7 +64,7 @@ export default function TutorApp() {
                 onClick={() => setTab(id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
                   ${tab === id
-                    ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700'}`}
               >
                 <Icon className="h-3.5 w-3.5" />

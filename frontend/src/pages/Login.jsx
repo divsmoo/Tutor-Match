@@ -51,7 +51,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
-      <div className="hidden lg:flex w-1/2 bg-green-800 flex-col justify-between p-12">
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-800 to-blue-600 flex-col justify-between p-12">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center">
             <Sparkles className="h-4 w-4 text-white" />
@@ -59,18 +59,18 @@ export default function Login() {
           <span className="font-bold text-white tracking-tight">TutorMatch</span>
         </Link>
         <div>
-          <blockquote className="text-green-100 text-xl font-medium leading-relaxed mb-4">
+          <blockquote className="text-blue-100 text-xl font-medium leading-relaxed mb-4">
             "TutorMatch helped me find the perfect tutor for A-Level Chemistry in under 24 hours."
           </blockquote>
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-white font-bold">S</div>
             <div>
               <p className="text-white text-sm font-medium">Sarah L.</p>
-              <p className="text-green-300 text-xs">Student, SMU</p>
+              <p className="text-blue-300 text-xs">Student, SMU</p>
             </div>
           </div>
         </div>
-        <p className="text-green-300 text-xs">© 2026 TutorMatch · ESD G7T1</p>
+        <p className="text-blue-300 text-xs">© 2026 TutorMatch · ESD G7T1</p>
       </div>
 
       {/* Right panel */}
@@ -78,7 +78,7 @@ export default function Login() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="h-7 w-7 rounded-lg bg-green-800 flex items-center justify-center">
+            <div className="h-7 w-7 rounded-lg bg-blue-700 flex items-center justify-center">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
             <span className="font-bold text-slate-900 dark:text-white tracking-tight">TutorMatch</span>
@@ -103,7 +103,7 @@ export default function Login() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="label mb-0">Password</label>
-                <button type="button" className="text-xs text-slate-400 hover:text-green-700 dark:hover:text-green-400 transition-colors">
+                <button type="button" className="text-xs text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
                   Forgot password?
                 </button>
               </div>
@@ -136,7 +136,7 @@ export default function Login() {
 
           <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-green-700 dark:text-green-400 font-medium hover:underline">Create one here</Link>
+            <Link to="/register" className="text-blue-700 dark:text-blue-400 font-medium hover:underline">Create one here</Link>
           </p>
         </div>
       </div>

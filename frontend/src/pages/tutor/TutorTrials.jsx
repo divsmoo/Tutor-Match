@@ -97,7 +97,7 @@ export default function TutorTrials({ tutor, notify }) {
               <div key={trial.trial_id} className="card p-5">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
                       {studentName(student)?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>

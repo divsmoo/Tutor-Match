@@ -15,8 +15,8 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-green-800 text-white text-sm font-medium rounded-lg
-           hover:bg-green-900 active:bg-green-950 transition-colors duration-150
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg
+           hover:bg-blue-800 active:bg-blue-900 transition-colors duration-150
            disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
@@ -41,9 +41,9 @@
 
   .input {
     @apply w-full px-3 py-2.5 text-sm bg-white border border-slate-200 rounded-lg outline-none
-           focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-colors placeholder:text-slate-400
+           focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-colors placeholder:text-slate-400
            dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:placeholder:text-slate-500
-           dark:focus:border-green-500 dark:focus:ring-green-900/30;
+           dark:focus:border-blue-500 dark:focus:ring-blue-900/30;
   }
 
   .label {
