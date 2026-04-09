@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Calendar, XCircle, RefreshCw } from 'lucide-react'
+import { Calendar, XCircle, RefreshCw, Mail } from 'lucide-react'
 import Spinner from '../../components/Spinner'
 import Badge from '../../components/Badge'
 import EmptyState from '../../components/EmptyState'
@@ -20,11 +20,28 @@ function calcRefund(trial, rate) {
 }
 
 export default function TutorTrials({ tutor, notify }) {
-  const [trials, setTrials]         = useState([])
-  const [studentMap, setStudentMap] = useState({})
-  const [loading, setLoading]       = useState(true)
+  const [trials, setTrials]             = useState([])
+  const [studentMap, setStudentMap]     = useState({})
+  const [loading, setLoading]           = useState(true)
   const [cancelTarget, setCancelTarget] = useState(null)
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting]     = useState(false)
+  const [contactReveal, setContactReveal] = useState(null) // trial to show in reveal modal
+
+  // localStorage key scoped to this tutor
+  const seenKey = `tutor_contact_seen_${tutor.tutor_id}`
+
+  function checkNewCompletions(completedTrials, map) {
+    const seen = new Set(JSON.parse(localStorage.getItem(seenKey) ?? '[]'))
+    const newlyCompleted = completedTrials.filter(
+      t => t.status === 'COMPLETED' && map[t.student_id] && !seen.has(t.trial_id)
+    )
+    if (newlyCompleted.length > 0) {
+      // Show modal for the first unseen completion; mark all as seen
+      setContactReveal(newlyCompleted[0])
+      newlyCompleted.forEach(t => seen.add(t.trial_id))
+      localStorage.setItem(seenKey, JSON.stringify([...seen]))
+    }
+  }
 
   async function load() {
     setLoading(true)
@@ -41,6 +58,7 @@ export default function TutorTrials({ tutor, notify }) {
         if (p.status === 'fulfilled') map[ids[idx]] = p.value.data
       })
       setStudentMap(map)
+      checkNewCompletions(mine, map)
     } finally {
       setLoading(false)
     }
@@ -92,6 +110,7 @@ export default function TutorTrials({ tutor, notify }) {
           {sorted.map(trial => {
             const student = studentMap[trial.student_id]
             const isCancellable = ['PENDING', 'CONFIRMED', 'PENDING_PAYMENT'].includes(trial.status)
+            const isCompleted = trial.status === 'COMPLETED'
 
             return (
               <div key={trial.trial_id} className="card p-5">
@@ -105,7 +124,7 @@ export default function TutorTrials({ tutor, notify }) {
                         {studentName(student) !== '–' ? studentName(student) : `Student #${trial.student_id}`}
                       </p>
                       <p className="text-xs text-slate-400 dark:text-slate-500">
-                        {studentEmail(student)} · Trial #{trial.trial_id}
+                        Trial #{trial.trial_id}
                       </p>
                     </div>
                   </div>
@@ -129,6 +148,14 @@ export default function TutorTrials({ tutor, notify }) {
                   </div>
                 </div>
 
+                {isCompleted && student && (
+                  <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl px-3 py-2 mb-3 text-xs">
+                    <Mail className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span className="text-slate-500 dark:text-slate-400 mr-1">Student email:</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-200 break-all">{studentEmail(student)}</span>
+                  </div>
+                )}
+
                 {trial.notes && (
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 italic">"{trial.notes}"</p>
                 )}
@@ -143,6 +170,28 @@ export default function TutorTrials({ tutor, notify }) {
           })}
         </div>
       )}
+
+      {/* Contact Reveal Modal — shown once when a trial first becomes COMPLETED */}
+      <Modal open={!!contactReveal} onClose={() => setContactReveal(null)} title="Student Contact Info">
+        {contactReveal && (() => {
+          const student = studentMap[contactReveal.student_id]
+          return (
+            <>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                Great! <strong>{studentName(student)}</strong> has decided to continue lessons with you.
+                You can now reach them directly:
+              </p>
+              <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-6">
+                <Mail className="h-4 w-4 text-slate-400 shrink-0" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200 break-all">
+                  {studentEmail(student)}
+                </span>
+              </div>
+              <button onClick={() => setContactReveal(null)} className="btn-primary w-full justify-center">Done</button>
+            </>
+          )
+        })()}
+      </Modal>
 
       {/* Cancel Modal */}
       <Modal open={!!cancelTarget} onClose={() => setCancelTarget(null)} title="Cancel Trial & Refund">
