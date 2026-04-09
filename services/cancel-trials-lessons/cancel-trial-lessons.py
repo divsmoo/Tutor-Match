@@ -39,6 +39,10 @@ def publish_trial_cancelled(student_email):
         print(f"[cancel_trial_lessons] RabbitMQ error: {e}")
 
 
+@app.route("/health", methods=['GET'])
+def health():
+    return jsonify({"status": "ok"}), 200
+
 @app.route("/cancel-trial", methods=['POST'])
 def cancel_trial():
     try:

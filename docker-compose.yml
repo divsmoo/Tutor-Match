@@ -337,14 +337,5 @@ services:
       - "8001:8001" # Admin API. Listens for calls from the command line over HTTP.
       - "8002:8002" # Kong Manager (GUI). Listens for HTTP traffic.
 
-  #######################################
-  # Kong setup: registers services, routes, key-auth
-  #######################################
-  kong-setup:
-    image: curlimages/curl:latest
-    entrypoint: ["/bin/sh", "/kong/setup.sh"]
-    volumes:
-      - ./kong:/kong:ro
-    depends_on:
-      - kong
-    restart: on-failure
+  # Kong routes/plugins are managed via kong.yaml (deck sync).
+  # Run: docker run --rm --network host -v "$(pwd):/workspace" -w /workspace kong/deck:latest sync kong.yaml --kong-addr http://localhost:8001
