@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { BookOpen, DollarSign, Heart, Search, SlidersHorizontal, X, Star, ChevronRight, GraduationCap } from 'lucide-react'
+import { BookOpen, DollarSign, Heart, Search, SlidersHorizontal, X, Star, GraduationCap } from 'lucide-react'
 import Spinner from '../../components/Spinner'
 import EmptyState from '../../components/EmptyState'
 import Modal from '../../components/Modal'
@@ -131,7 +131,7 @@ export default function BrowseTutors({ student, notify }) {
 
       {/* Search + filter bar */}
       <div className="flex gap-2 mb-4">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
@@ -143,10 +143,10 @@ export default function BrowseTutors({ student, notify }) {
         </div>
         <button
           onClick={() => setShowFilters(f => !f)}
-          className={`btn-secondary relative ${showFilters ? 'ring-2 ring-blue-600' : ''}`}
+          className={`btn-secondary relative shrink-0 ${showFilters ? 'ring-2 ring-blue-600' : ''}`}
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
-          Filters
+          <span className="hidden sm:inline">Filters</span>
           {activeFilters > 0 && (
             <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-blue-700 text-white text-[10px] font-bold flex items-center justify-center">
               {activeFilters}
@@ -204,44 +204,54 @@ export default function BrowseTutors({ student, notify }) {
         : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map(tutor => (
-              <div key={tutor.tutor_id} className="card p-5 flex flex-col gap-4 hover:shadow-md transition-shadow group">
-                {/* Avatar + name */}
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                    {tutor.name?.[0]?.toUpperCase() ?? '?'}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-slate-900 dark:text-white truncate">{tutor.name}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 truncate">Tutor #{tutor.tutor_id}</p>
-                  </div>
-                </div>
+              <div key={tutor.tutor_id}
+                className="card overflow-hidden flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
+                {/* Top accent stripe */}
+                <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
 
-                {/* Subject & rate */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                    <BookOpen className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                    <span>{tutor.subject ?? 'General'}</span>
+                <div className="p-5 flex flex-col gap-4 flex-1">
+                  {/* Avatar + name row */}
+                  <div className="flex items-start gap-3.5">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-base font-bold shrink-0 shadow-sm">
+                      {tutor.name?.[0]?.toUpperCase() ?? '?'}
+                    </div>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <p className="font-semibold text-slate-900 dark:text-white truncate text-sm">{tutor.name}</p>
+                      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                        <BookOpen className="h-2.5 w-2.5" /> {tutor.subject ?? 'General'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                    <DollarSign className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                    <span>SGD {tutor.rate ?? '–'} / hr</span>
-                  </div>
-                </div>
 
-                {/* Actions */}
-                <div className="flex gap-2 mt-auto">
-                  <button
-                    onClick={() => setProfile(tutor)}
-                    className="btn-secondary flex-1 justify-center text-xs"
-                  >
-                    <ChevronRight className="h-3.5 w-3.5" /> View Profile
-                  </button>
-                  <button
-                    onClick={() => setConfirm(tutor)}
-                    className="btn-primary flex-1 justify-center text-xs"
-                  >
-                    <Heart className="h-3.5 w-3.5" /> Interest
-                  </button>
+                  {/* Rate */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                        <DollarSign className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">SGD {tutor.rate ?? '–'}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">per hour</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-slate-300 dark:text-slate-600">#{tutor.tutor_id}</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 mt-auto pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                    <button
+                      onClick={() => setProfile(tutor)}
+                      className="btn-secondary flex-1 justify-center text-xs py-2"
+                    >
+                      View Profile
+                    </button>
+                    <button
+                      onClick={() => setConfirm(tutor)}
+                      className="btn-primary flex-1 justify-center text-xs py-2"
+                    >
+                      <Heart className="h-3.5 w-3.5" /> Interest
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

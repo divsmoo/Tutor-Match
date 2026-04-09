@@ -55,40 +55,49 @@ export default function MyInterests({ student }) {
           description="Browse tutors and indicate interest to get started"
         />
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.map(interest => {
             const tutor = tutorMap[interest.tutor_id]
             return (
-              <div key={interest.interest_id} className="card p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+              <div key={interest.interest_id}
+                className="card overflow-hidden flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                {/* Top accent stripe */}
+                <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
+
+                <div className="p-5 flex flex-col gap-4 flex-1">
+                  {/* Avatar + name */}
+                  <div className="flex items-start gap-3.5">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-base font-bold shrink-0 shadow-sm">
                       {tutor?.name?.[0]?.toUpperCase() ?? '?'}
                     </div>
-                    <div>
-                      <p className="font-medium text-slate-900 dark:text-white text-sm">
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <p className="font-semibold text-slate-900 dark:text-white truncate text-sm">
                         {tutor?.name ?? `Tutor #${interest.tutor_id}`}
                       </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{tutor?.subject ?? '–'}</p>
+                      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                        {tutor?.subject ?? 'General'}
+                      </span>
                     </div>
                   </div>
-                  <div className="text-right">
+
+                  {/* Status + date */}
+                  <div className="flex items-center justify-between">
                     <Badge status={interest.status} />
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500">
                       {new Date(interest.created).toLocaleDateString('en-SG', {
                         day: 'numeric', month: 'short', year: 'numeric'
                       })}
-                    </p>
+                    </span>
                   </div>
-                </div>
 
-                {interest.status === 'ACCEPTED' && (
-                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                      Tutor accepted your interest. Check <strong>My Trials</strong> to confirm and pay.
-                    </p>
-                  </div>
-                )}
+                  {interest.status === 'ACCEPTED' && (
+                    <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                        Tutor accepted — check <strong>My Trials</strong> to confirm and pay.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             )
           })}

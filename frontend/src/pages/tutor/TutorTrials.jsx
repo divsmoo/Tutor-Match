@@ -113,19 +113,22 @@ export default function TutorTrials({ tutor, notify }) {
             const isCompleted = trial.status === 'COMPLETED'
 
             return (
-              <div key={trial.trial_id} className="card p-5">
+              <div key={trial.trial_id} className="card overflow-hidden hover:shadow-md transition-shadow">
+                {/* Top accent stripe */}
+                <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
+                <div className="p-5">
                 <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  <div className="flex items-center gap-3.5">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-base font-bold shrink-0 shadow-sm">
                       {studentName(student)?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white text-sm">
+                      <p className="font-semibold text-slate-900 dark:text-white text-sm">
                         {studentName(student) !== '–' ? studentName(student) : `Student #${trial.student_id}`}
                       </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">
+                      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
                         Trial #{trial.trial_id}
-                      </p>
+                      </span>
                     </div>
                   </div>
                   <Badge status={trial.status} />
@@ -165,6 +168,7 @@ export default function TutorTrials({ tutor, notify }) {
                     <XCircle className="h-3.5 w-3.5" /> Cancel & Refund
                   </button>
                 )}
+                </div>
               </div>
             )
           })}

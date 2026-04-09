@@ -91,36 +91,48 @@ export default function InterestedStudents({ tutor, notify }) {
           {students.map(student => {
             const interest = getInterest(student.student_id)
             return (
-              <div key={student.student_id} className="card p-5 flex flex-col gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                    {studentName(student)?.[0]?.toUpperCase() ?? '?'}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-slate-900 dark:text-white truncate">{studentName(student)}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">Student #{student.student_id}</p>
-                  </div>
-                </div>
+              <div key={student.student_id}
+                className="card overflow-hidden flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                {/* Top accent stripe */}
+                <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
 
-                <div className="space-y-1.5 text-xs">
+                <div className="p-5 flex flex-col gap-4 flex-1">
+                  {/* Avatar + name */}
+                  <div className="flex items-start gap-3.5">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-base font-bold shrink-0 shadow-sm">
+                      {studentName(student)?.[0]?.toUpperCase() ?? '?'}
+                    </div>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <p className="font-semibold text-slate-900 dark:text-white truncate text-sm">{studentName(student)}</p>
+                      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                        Student #{student.student_id}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Request date */}
                   {interest && (
-                    <div className="text-slate-400 dark:text-slate-500">
-                      Requested {new Date(interest.created).toLocaleDateString('en-SG', {
-                        day: 'numeric', month: 'short'
-                      })}
+                    <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
+                      <span>Requested</span>
+                      <span className="font-medium text-slate-600 dark:text-slate-300">
+                        {new Date(interest.created).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
                     </div>
                   )}
-                </div>
 
-                {interest ? (
-                  <button onClick={() => openAccept(student)} className="btn-primary w-full justify-center mt-auto">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Accept & Schedule
-                  </button>
-                ) : (
-                  <button disabled className="btn-secondary w-full justify-center mt-auto opacity-60 cursor-not-allowed">
-                    <CalendarCheck className="h-3.5 w-3.5" /> Trial Date Set
-                  </button>
-                )}
+                  {/* Action */}
+                  <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                    {interest ? (
+                      <button onClick={() => openAccept(student)} className="btn-primary w-full justify-center">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Accept & Schedule
+                      </button>
+                    ) : (
+                      <button disabled className="btn-secondary w-full justify-center opacity-60 cursor-not-allowed">
+                        <CalendarCheck className="h-3.5 w-3.5" /> Trial Date Set
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             )
           })}

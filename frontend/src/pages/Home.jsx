@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import {
   BookOpen, Users, CalendarCheck, Star, ArrowRight,
-  CheckCircle2, Clock, Shield, MessageSquare, Sparkles,
+  CheckCircle2, Clock, Shield, MessageSquare,
   GraduationCap, TrendingUp, Award, ChevronRight, Sun, Moon
 } from 'lucide-react'
 import { getSession } from '../lib/auth'
@@ -72,7 +72,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 shrink-0">
             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-blue-700 flex items-center justify-center">
-              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+              <span className="text-white text-[11px] font-black tracking-tight leading-none">TM</span>
             </div>
             <span className="font-bold text-slate-900 dark:text-white tracking-tight text-sm sm:text-base">TutorMatch</span>
           </button>
@@ -320,7 +320,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="h-6 w-6 rounded-md bg-blue-700 flex items-center justify-center">
-              <Sparkles className="h-3 w-3 text-white" />
+              <span className="text-white text-[9px] font-black tracking-tight leading-none">TM</span>
             </div>
             <span className="text-sm font-semibold text-slate-300">TutorMatch</span>
           </div>

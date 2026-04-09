@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, RefreshCw, CheckCircle2, XCircle, Clock, Activity, ExternalLink, Rabbit } from 'lucide-react'
+import { RefreshCw, CheckCircle2, XCircle, Clock, Activity, ExternalLink, Rabbit } from 'lucide-react'
 import { useTheme } from '../lib/theme'
 import { Sun, Moon } from 'lucide-react'
 
@@ -24,11 +24,11 @@ const SERVICES = [
 ]
 
 const INFRA = [
-  { name: 'Kong Gateway',       url: 'http://localhost:8000', checkUrl: 'http://localhost:8001', label: '→ :8000' },
-  { name: 'Kong Admin API',     url: 'http://localhost:8001', checkUrl: 'http://localhost:8001', label: '→ :8001' },
-  { name: 'Prometheus',         url: 'http://localhost:9090', checkUrl: 'http://localhost:9090/-/healthy', label: '→ :9090' },
-  { name: 'Grafana',            url: 'http://localhost:3000', checkUrl: 'http://localhost:3000/api/health', label: '→ :3000' },
-  { name: 'RabbitMQ',           url: 'http://localhost:15672', checkUrl: 'http://localhost:15672', label: '→ :15672' },
+  { name: 'Kong Gateway',   url: 'http://localhost:8000', label: ':8000', desc: 'API Gateway — all microservice traffic' },
+  { name: 'Kong Admin UI',  url: 'http://localhost:8002', label: ':8002', desc: 'Manage routes, services, plugins' },
+  { name: 'Prometheus',     url: 'http://localhost:9090', label: ':9090', desc: 'Metrics scraping & time-series storage' },
+  { name: 'Grafana',        url: 'http://localhost:3000', label: ':3000', desc: 'Service health dashboards — admin / admin' },
+  { name: 'RabbitMQ',       url: 'http://localhost:15672', label: ':15672', desc: 'Message queue management — guest / guest' },
 ]
 
 async function probe(url) {
@@ -50,19 +50,16 @@ function StatusDot({ ok, checking }) {
 
 export default function Status() {
   const { dark, toggle } = useTheme()
-  const [results, setResults]     = useState({})
-  const [infraRes, setInfraRes]   = useState({})
-  const [checking, setChecking]   = useState(true)
-  const [lastChecked, setLast]    = useState(null)
+  const [results, setResults]  = useState({})
+  const [checking, setChecking] = useState(true)
+  const [lastChecked, setLast]  = useState(null)
 
   const runChecks = useCallback(async () => {
     setChecking(true)
-    const [svcResults, infraResults] = await Promise.all([
-      Promise.all(SERVICES.map(s => probe(s.url).then(r => [s.name, r]))),
-      Promise.all(INFRA.map(s => probe(s.checkUrl).then(r => [s.name, r]))),
-    ])
+    const svcResults = await Promise.all(
+      SERVICES.map(s => probe(s.url).then(r => [s.name, r]))
+    )
     setResults(Object.fromEntries(svcResults))
-    setInfraRes(Object.fromEntries(infraResults))
     setLast(new Date())
     setChecking(false)
   }, [])
@@ -84,7 +81,7 @@ export default function Status() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
             <div className="h-7 w-7 rounded-lg bg-blue-700 flex items-center justify-center">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
+              <span className="text-white text-[11px] font-black tracking-tight leading-none">TM</span>
             </div>
             <span className="font-semibold text-slate-900 text-sm tracking-tight dark:text-white">TutorMatch</span>
           </Link>
@@ -199,30 +196,19 @@ export default function Status() {
               <Activity className="h-4 w-4 text-indigo-600" /> Infrastructure
             </h2>
             <div className="card mb-4 divide-y divide-slate-100 dark:divide-slate-700">
-              {INFRA.map(s => {
-                const r = infraRes[s.name]
-                return (
-                  <div key={s.name} className="flex items-center justify-between px-4 py-2.5">
-                    <div className="flex items-center gap-2.5">
-                      <StatusDot ok={r?.ok} checking={checking || !r} />
-                      <div>
-                        <span className="text-sm text-slate-700 dark:text-slate-200">{s.name}</span>
-                        <span className="text-xs text-slate-400 ml-1.5">{s.label}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      {r && <span className="text-slate-400">{r.ms}ms</span>}
-                      <span className={`font-medium ${r?.ok ? 'text-emerald-600' : 'text-red-500'}`}>
-                        {checking || !r ? '…' : r.ok ? 'UP' : 'DOWN'}
-                      </span>
-                      <a href={s.url} target="_blank" rel="noreferrer"
-                        className="text-blue-500 hover:text-blue-700 transition-colors">
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </div>
+              {INFRA.map(s => (
+                <div key={s.name} className="flex items-center justify-between px-4 py-2.5">
+                  <div>
+                    <span className="text-sm text-slate-700 dark:text-slate-200">{s.name}</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500 ml-1.5">{s.label}</span>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{s.desc}</p>
                   </div>
-                )
-              })}
+                  <a href={s.url} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline shrink-0 ml-3">
+                    Open <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              ))}
             </div>
 
             {/* RabbitMQ card */}

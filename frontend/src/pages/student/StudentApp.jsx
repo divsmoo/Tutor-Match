@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { GraduationCap, Search, BookMarked, Calendar, LogOut, Sparkles, Sun, Moon, Bell, Wallet, CheckCircle2, AlertCircle } from 'lucide-react'
+import { GraduationCap, Search, BookMarked, Calendar, LogOut, Sun, Moon, Bell, Wallet, CheckCircle2, AlertCircle } from 'lucide-react'
 import Toast from '../../components/Toast'
 import BrowseTutors from './BrowseTutors'
 import MyInterests from './MyInterests'
@@ -101,12 +101,12 @@ export default function StudentApp() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
             <div className="h-7 w-7 rounded-lg bg-blue-700 flex items-center justify-center">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
+              <span className="text-white text-[11px] font-black tracking-tight leading-none">TM</span>
             </div>
             <span className="font-semibold text-slate-900 text-sm tracking-tight dark:text-white">TutorMatch</span>
           </Link>
 
-          <nav className="flex items-center gap-1">
+          <nav className="hidden sm:flex items-center gap-1">
             {TABS.map(({ id, label, icon: Icon }) => (
               <button key={id} onClick={() => setTab(id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
@@ -115,7 +115,7 @@ export default function StudentApp() {
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700'}`}
               >
                 <Icon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{label}</span>
+                <span className="hidden md:inline">{label}</span>
               </button>
             ))}
           </nav>
@@ -200,11 +200,27 @@ export default function StudentApp() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-8">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-8 pb-24 sm:pb-8">
         {tab === 'browse'    && <BrowseTutors student={student} notify={notify} />}
         {tab === 'interests' && <MyInterests  student={student} notify={notify} />}
         {tab === 'trials'    && <MyTrials     student={student} notify={notify} />}
       </main>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 sm:hidden bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 flex z-30">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button key={id} onClick={() => setTab(id)}
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${
+              tab === id
+                ? 'text-blue-700 dark:text-blue-400'
+                : 'text-slate-400 dark:text-slate-500'
+            }`}
+          >
+            <Icon className="h-5 w-5" />
+            <span className="text-[10px] font-medium leading-none">{label}</span>
+          </button>
+        ))}
+      </nav>
 
       <Toast toast={toast} onClose={() => setToast(null)} />
     </div>

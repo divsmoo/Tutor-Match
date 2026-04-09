@@ -206,17 +206,22 @@ export default function MyTrials({ student, notify }) {
             const isCancellable = ['PENDING', 'PENDING_PAYMENT', 'CONFIRMED'].includes(trial.status)
 
             return (
-              <div key={trial.trial_id} className="card p-5">
+              <div key={trial.trial_id} className="card overflow-hidden hover:shadow-md transition-shadow">
+                {/* Top accent stripe */}
+                <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
+                <div className="p-5">
                 <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  <div className="flex items-center gap-3.5">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-base font-bold shrink-0 shadow-sm">
                       {tutor?.name?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-white text-sm">
+                      <p className="font-semibold text-slate-900 dark:text-white text-sm">
                         {tutor?.name ?? `Tutor #${trial.tutor_id}`}
                       </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">{tutor?.subject ?? '–'} · Trial #{trial.trial_id}</p>
+                      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                        {tutor?.subject ?? 'General'}
+                      </span>
                     </div>
                   </div>
                   <Badge status={trial.status} />
@@ -248,7 +253,7 @@ export default function MyTrials({ student, notify }) {
                     <span className="font-medium text-slate-700 dark:text-slate-200 break-all">{tutor.contact_info}</span>
                   </div>
                 )}
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap pt-1">
                   {isPending && (
                     <button onClick={() => setPayTrial(trial)} className="btn-primary">
                       <CreditCard className="h-3.5 w-3.5" /> Confirm &amp; Pay
@@ -264,6 +269,7 @@ export default function MyTrials({ student, notify }) {
                       <XCircle className="h-3.5 w-3.5" /> Cancel Booking
                     </button>
                   )}
+                </div>
                 </div>
               </div>
             )

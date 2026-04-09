@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { login } from '../lib/auth'
 import { getStudent, getTutor } from '../lib/api'
 import Spinner from '../components/Spinner'
@@ -54,7 +54,7 @@ export default function Login() {
       <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-800 to-blue-600 flex-col justify-between p-12">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center">
-            <Sparkles className="h-4 w-4 text-white" />
+            <span className="text-white text-[11px] font-black tracking-tight leading-none">TM</span>
           </div>
           <span className="font-bold text-white tracking-tight">TutorMatch</span>
         </Link>
@@ -79,7 +79,7 @@ export default function Login() {
           {/* Mobile logo */}
           <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="h-7 w-7 rounded-lg bg-blue-700 flex items-center justify-center">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
+              <span className="text-white text-[11px] font-black tracking-tight leading-none">TM</span>
             </div>
             <span className="font-bold text-slate-900 dark:text-white tracking-tight">TutorMatch</span>
           </Link>
