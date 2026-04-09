@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Calendar, CheckCircle2, XCircle, RefreshCw, CreditCard, Wallet, Mail } from 'lucide-react'
+import { Calendar, CheckCircle2, XCircle, RefreshCw, CreditCard, Wallet, Mail, AlertCircle } from 'lucide-react'
 import Spinner from '../../components/Spinner'
 import Badge from '../../components/Badge'
 import EmptyState from '../../components/EmptyState'
@@ -7,6 +7,62 @@ import Modal from '../../components/Modal'
 import PaymentModal from '../../components/PaymentModal'
 import { getAllTrials, getTutor, continueLessons, cancelTrialBooking } from '../../lib/api'
 import { supabase } from '../../lib/supabase'
+
+// ── Improvement 2: Trial status timeline ──────────────────────
+const STEPS = ['Proposed', 'Payment', 'Confirmed', 'Completed']
+
+function statusToStep(status) {
+  if (['USER_CANCELLED', 'TUTOR_CANCELLED'].includes(status)) return -1
+  if (status === 'PENDING')         return 0
+  if (status === 'PENDING_PAYMENT') return 1
+  if (status === 'CONFIRMED')       return 2
+  if (status === 'COMPLETED')       return 3
+  return 0
+}
+
+function StatusTimeline({ status }) {
+  const step = statusToStep(status)
+  const cancelled = step === -1
+  if (cancelled) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl px-3 py-2 mb-4">
+        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+        <span className="font-medium">
+          {status === 'USER_CANCELLED' ? 'You cancelled this trial' : 'Tutor cancelled this trial'}
+        </span>
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-center mb-4">
+      {STEPS.map((label, i) => {
+        const done    = i < step
+        const current = i === step
+        return (
+          <div key={label} className="flex items-center flex-1 last:flex-none">
+            <div className="flex flex-col items-center gap-1">
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold ring-2 transition-colors ${
+                done    ? 'bg-green-700 text-white ring-green-700' :
+                current ? 'bg-white dark:bg-slate-800 text-green-700 ring-green-700' :
+                          'bg-slate-100 dark:bg-slate-700 text-slate-400 ring-slate-200 dark:ring-slate-600'
+              }`}>
+                {done ? '✓' : i + 1}
+              </div>
+              <span className={`text-[10px] whitespace-nowrap font-medium ${
+                done || current ? 'text-green-700 dark:text-green-400' : 'text-slate-400 dark:text-slate-500'
+              }`}>{label}</span>
+            </div>
+            {i < STEPS.length - 1 && (
+              <div className={`flex-1 h-0.5 mx-1 mb-4 transition-colors ${
+                i < step ? 'bg-green-700' : 'bg-slate-200 dark:bg-slate-600'
+              }`} />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 function fmt(dateStr) {
   if (!dateStr) return '–'
@@ -165,6 +221,8 @@ export default function MyTrials({ student, notify }) {
                   </div>
                   <Badge status={trial.status} />
                 </div>
+
+                <StatusTimeline status={trial.status} />
 
                 <div className="grid grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl p-3 mb-4 text-xs">
                   <div>

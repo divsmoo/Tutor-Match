@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Probe all microservice /health endpoints via Blackbox Exporter
+  - job_name: 'tutor-match-services'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          # Atomic services
+          - http://tutor:5001/health
+          - http://student:5002/health
+          - http://interest:5003/health
+          - http://trials:5004/health
+          - http://payment:5005/health
+          - http://notification:5006/health
+          - http://credit:5007/health
+          # Composite services
+          - http://indicate-interest:5010/health
+          - http://get-interested-students:5011/health
+          - http://accept-student:5012/health
+          - http://make-trial-booking:5013/health
+          - http://continue-lessons:5014/health
+          - http://cancel-trial-booking:5015/health
+          - http://cancel-trial-lessons:5016/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # Scrape Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Scrape Blackbox Exporter itself
+  - job_name: 'blackbox'
+    static_configs:
+      - targets: ['blackbox-exporter:9115']
