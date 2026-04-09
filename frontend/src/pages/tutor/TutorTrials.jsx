@@ -11,6 +11,14 @@ function fmt(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+function calcRefund(trial, rate) {
+  if (!trial?.start_time || !trial?.end_time || !rate) return null
+  const [sh, sm] = trial.start_time.split(':').map(Number)
+  const [eh, em] = trial.end_time.split(':').map(Number)
+  const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60
+  return Math.max(0, Math.round(rate * hours * 100) / 100)
+}
+
 export default function TutorTrials({ tutor, notify }) {
   const [trials, setTrials]         = useState([])
   const [studentMap, setStudentMap] = useState({})
@@ -44,9 +52,9 @@ export default function TutorTrials({ tutor, notify }) {
   async function handleCancel() {
     setSubmitting(true)
     try {
-      const res = await cancelTrialLessons(cancelTarget.trial_id)
-      const refund = res.data?.credit_refund?.balance
-      notify(`Trial cancelled. Student has been refunded SGD ${refund ?? 50} in credits.`)
+      await cancelTrialLessons(cancelTarget.trial_id)
+      const refund = calcRefund(cancelTarget, tutor.rate)
+      notify(`Trial cancelled. Student has been refunded SGD ${refund ?? '–'} in credits.`)
       setCancelTarget(null)
       load()
     } catch (err) {
@@ -142,7 +150,8 @@ export default function TutorTrials({ tutor, notify }) {
           <>
             <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
               Are you sure you want to cancel Trial #{cancelTarget.trial_id}?
-              The student will be notified and <strong>SGD 50 in credits</strong> will be refunded to them.
+              The student will be notified and{' '}
+              <strong>SGD {calcRefund(cancelTarget, tutor.rate) ?? '–'} in credits</strong> will be refunded to them.
             </p>
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-xs text-amber-700 dark:text-amber-400 mb-5">
               This action cannot be undone. The student will receive an email notification.

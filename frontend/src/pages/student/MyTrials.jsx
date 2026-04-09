@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Calendar, CheckCircle2, XCircle, RefreshCw, CreditCard } from 'lucide-react'
+import { Calendar, CheckCircle2, XCircle, RefreshCw, CreditCard, Wallet, Mail } from 'lucide-react'
 import Spinner from '../../components/Spinner'
 import Badge from '../../components/Badge'
 import EmptyState from '../../components/EmptyState'
 import Modal from '../../components/Modal'
 import PaymentModal from '../../components/PaymentModal'
 import { getAllTrials, getTutor, continueLessons, cancelTrialBooking } from '../../lib/api'
+import { supabase } from '../../lib/supabase'
 
 function fmt(dateStr) {
   if (!dateStr) return '–'
@@ -19,6 +20,20 @@ export default function MyTrials({ student, notify }) {
   const [modal, setModal]         = useState(null)    // { type: 'continue'|'cancel', trial }
   const [payTrial, setPayTrial]   = useState(null)    // trial object for payment modal
   const [submitting, setSubmitting] = useState(false)
+  const [credit, setCredit]       = useState(null)
+
+  async function loadCredit() {
+    try {
+      const { data } = await supabase
+        .from('credit')
+        .select('balance')
+        .eq('student_id', student.student_id)
+        .single()
+      setCredit(data?.balance ?? null)
+    } catch {
+      // credit display is non-critical, fail silently
+    }
+  }
 
   async function load() {
     setLoading(true)
@@ -40,13 +55,28 @@ export default function MyTrials({ student, notify }) {
     }
   }
 
-  useEffect(() => { load() }, [student.student_id])
+  useEffect(() => {
+    load()
+    loadCredit()
+
+    const channel = supabase
+      .channel(`credit:${student.student_id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'credit', filter: `student_id=eq.${student.student_id}` },
+        payload => setCredit(payload.new?.balance ?? null),
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [student.student_id])
 
   // ── Scenario 2b — called by PaymentModal after Stripe confirms ──
   function handleBooked() {
     notify('Payment confirmed! Your trial is now booked.')
     setPayTrial(null)
     load()
+    loadCredit()
   }
 
   // ── Scenario 2c ─────────────────────────────────────────────
@@ -55,7 +85,7 @@ export default function MyTrials({ student, notify }) {
     try {
       await continueLessons(trial.trial_id, trial.student_id, trial.tutor_id)
       notify('Marked as completed! Your tutor has been notified.')
-      setModal(null)
+      setModal({ type: 'contact', trial })
       load()
     } catch {
       notify('Failed to update. Please try again.', 'error')
@@ -72,6 +102,7 @@ export default function MyTrials({ student, notify }) {
       notify('Trial cancelled. Your tutor has been notified.')
       setModal(null)
       load()
+      loadCredit()
     } catch (err) {
       notify(err?.response?.data?.error ?? 'Failed to cancel trial', 'error')
     } finally {
@@ -92,9 +123,15 @@ export default function MyTrials({ student, notify }) {
           <h2 className="text-xl font-semibold text-slate-900 dark:text-white">My Trials</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your trial bookings and lessons</p>
         </div>
-        <button onClick={load} className="btn-secondary">
-          <RefreshCw className="h-3.5 w-3.5" /> Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:text-emerald-300">
+            <Wallet className="h-3.5 w-3.5" />
+            {credit === null ? '–' : `SGD ${Number(credit).toFixed(2)}`}
+          </div>
+          <button onClick={load} className="btn-secondary">
+            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          </button>
+        </div>
       </div>
 
       {sorted.length === 0 ? (
@@ -107,9 +144,10 @@ export default function MyTrials({ student, notify }) {
         <div className="space-y-3">
           {sorted.map(trial => {
             const tutor        = tutorMap[trial.tutor_id]
-            const isPending    = trial.status === 'PENDING'
+            const isPending    = ['PENDING', 'PENDING_PAYMENT'].includes(trial.status)
             const isConfirmed  = trial.status === 'CONFIRMED'
-            const isCancellable = ['PENDING', 'CONFIRMED'].includes(trial.status)
+            const isCompleted  = trial.status === 'COMPLETED'
+            const isCancellable = ['PENDING', 'PENDING_PAYMENT', 'CONFIRMED'].includes(trial.status)
 
             return (
               <div key={trial.trial_id} className="card p-5">
@@ -145,6 +183,13 @@ export default function MyTrials({ student, notify }) {
                   </div>
                 </div>
 
+                {isCompleted && tutor?.contact_info && (
+                  <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl px-3 py-2 mb-3 text-xs">
+                    <Mail className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span className="text-slate-500 dark:text-slate-400 mr-1">Tutor email:</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-200 break-all">{tutor.contact_info}</span>
+                  </div>
+                )}
                 <div className="flex gap-2 flex-wrap">
                   {isPending && (
                     <button onClick={() => setPayTrial(trial)} className="btn-primary">
@@ -212,6 +257,27 @@ export default function MyTrials({ student, notify }) {
             </div>
           </>
         )}
+      </Modal>
+
+      {/* Contact Reveal Modal — shown after student confirms continuing lessons */}
+      <Modal open={modal?.type === 'contact'} onClose={() => setModal(null)} title="Tutor Contact Info">
+        {modal?.trial && (() => {
+          const tutor = tutorMap[modal.trial.tutor_id]
+          return (
+            <>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                Great! <strong>{tutor?.name}</strong> has been notified. You can now reach them directly:
+              </p>
+              <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-6">
+                <Mail className="h-4 w-4 text-slate-400 shrink-0" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-200 break-all">
+                  {tutor?.contact_info ?? '–'}
+                </span>
+              </div>
+              <button onClick={() => setModal(null)} className="btn-primary w-full justify-center">Done</button>
+            </>
+          )
+        })()}
       </Modal>
     </div>
   )

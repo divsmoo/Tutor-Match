@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BookOpen, DollarSign, Mail, Heart, Search } from 'lucide-react'
+import { BookOpen, DollarSign, Heart, Search } from 'lucide-react'
 import Spinner from '../../components/Spinner'
 import EmptyState from '../../components/EmptyState'
 import Modal from '../../components/Modal'
@@ -88,10 +88,6 @@ export default function BrowseTutors({ student, notify }) {
                   <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                     <DollarSign className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                     <span>SGD {tutor.rate ?? '–'} / hr</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                    <Mail className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                    <span className="truncate">{tutor.contact_info ?? '–'}</span>
                   </div>
                 </div>
 

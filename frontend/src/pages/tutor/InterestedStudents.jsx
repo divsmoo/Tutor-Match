@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, Mail, RefreshCw, CheckCircle2 } from 'lucide-react'
+import { Users, Mail, RefreshCw, CheckCircle2, CalendarCheck } from 'lucide-react'
 import Spinner from '../../components/Spinner'
 import EmptyState from '../../components/EmptyState'
 import Modal from '../../components/Modal'
@@ -116,9 +116,15 @@ export default function InterestedStudents({ tutor, notify }) {
                   )}
                 </div>
 
-                <button onClick={() => openAccept(student)} className="btn-primary w-full justify-center mt-auto">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Accept & Schedule
-                </button>
+                {interest ? (
+                  <button onClick={() => openAccept(student)} className="btn-primary w-full justify-center mt-auto">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Accept & Schedule
+                  </button>
+                ) : (
+                  <button disabled className="btn-secondary w-full justify-center mt-auto opacity-60 cursor-not-allowed">
+                    <CalendarCheck className="h-3.5 w-3.5" /> Trial Date Set
+                  </button>
+                )}
               </div>
             )
           })}

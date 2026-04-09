@@ -39,6 +39,24 @@ class Query:
 @strawberry.type
 class Mutation:
     @strawberry.mutation
+    def deduct_credits(self, student_id: int, amount: float) -> Credit:
+        if amount <= 0:
+            raise ValueError("Amount must be a positive number")
+
+        existing = supabase.table("credit").select("*").eq("student_id", student_id).execute()
+        if not existing.data:
+            raise ValueError(f"No credit record found for student {student_id}")
+
+        new_balance = max(0, existing.data[0]["balance"] - amount)
+        response = (
+            supabase.table("credit")
+            .update({"balance": new_balance})
+            .eq("student_id", student_id)
+            .execute()
+        )
+        return Credit(**response.data[0])
+
+    @strawberry.mutation
     def upsert_credits(self, student_id: int, amount: float) -> Credit:
         if amount <= 0:
             raise ValueError("Amount must be a positive number")
