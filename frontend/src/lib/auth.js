@@ -29,8 +29,8 @@ export async function login({ email, password }) {
 }
 
 export async function logout() {
+  localStorage.removeItem(SESSION_KEY)   // clear immediately (sync) before async signOut
   await supabase.auth.signOut()
-  localStorage.removeItem(SESSION_KEY)
 }
 
 export function getSession() {

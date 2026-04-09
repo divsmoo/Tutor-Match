@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { GraduationCap, Search, BookMarked, Calendar, LogOut, Sparkles, Sun, Moon } from 'lucide-react'
+import { GraduationCap, Search, BookMarked, Calendar, LogOut, Sparkles, Sun, Moon, Bell, Wallet, CheckCircle2, AlertCircle } from 'lucide-react'
 import Toast from '../../components/Toast'
 import BrowseTutors from './BrowseTutors'
 import MyInterests from './MyInterests'
@@ -10,6 +10,7 @@ import { getSession, logout } from '../../lib/auth'
 import { studentName as getStudentName } from '../../lib/api'
 import { getStudent } from '../../lib/api'
 import { useTheme } from '../../lib/theme'
+import { supabase } from '../../lib/supabase'
 
 const TABS = [
   { id: 'browse',    label: 'Browse Tutors',  icon: Search },
@@ -17,13 +18,22 @@ const TABS = [
   { id: 'trials',    label: 'My Trials',      icon: Calendar },
 ]
 
+const MAX_NOTIFICATIONS = 5
+
 export default function StudentApp() {
   const navigate = useNavigate()
   const { dark, toggle } = useTheme()
-  const [student, setStudent] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [tab, setTab]     = useState('browse')
-  const [toast, setToast] = useState(null)
+  const [student, setStudent]       = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [tab, setTab]               = useState('browse')
+  const [toast, setToast]           = useState(null)
+  // Improvement 4: credit in header
+  const [credit, setCredit]         = useState(null)
+  // Improvement 5: notification history
+  const [notifications, setNotifs]  = useState([])
+  const [bellOpen, setBellOpen]     = useState(false)
+  const [unread, setUnread]         = useState(0)
+  const bellRef                     = useRef(null)
 
   useEffect(() => {
     const session = getSession()
@@ -34,10 +44,45 @@ export default function StudentApp() {
       .finally(() => setLoading(false))
   }, [])
 
-  const notify = (message, type = 'success') => setToast({ message, type })
+  // Fetch credit + subscribe to realtime changes
+  useEffect(() => {
+    if (!student) return
+    const fetchCredit = async () => {
+      try {
+        const { data } = await supabase
+          .from('credit')
+          .select('balance')
+          .eq('student_id', student.student_id)
+          .single()
+        setCredit(data?.balance ?? null)
+      } catch { /* non-critical */ }
+    }
+    fetchCredit()
 
-  function handleLogout() {
-    logout()
+    const channel = supabase
+      .channel(`credit-header:${student.student_id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'credit', filter: `student_id=eq.${student.student_id}` },
+        payload => setCredit(payload.new?.balance ?? null))
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [student?.student_id])
+
+  // Close bell dropdown on outside click
+  useEffect(() => {
+    function handler(e) { if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const notify = (message, type = 'success') => {
+    setToast({ message, type })
+    const entry = { id: Date.now(), message, type, time: new Date() }
+    setNotifs(prev => [entry, ...prev].slice(0, MAX_NOTIFICATIONS))
+    setUnread(n => n + 1)
+  }
+
+  async function handleLogout() {
+    await logout()
     navigate('/')
   }
 
@@ -63,9 +108,7 @@ export default function StudentApp() {
 
           <nav className="flex items-center gap-1">
             {TABS.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
+              <button key={id} onClick={() => setTab(id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
                   ${tab === id
                     ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-400'
@@ -77,11 +120,67 @@ export default function StudentApp() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {/* Improvement 4: Credit balance */}
+            {credit !== null && (
+              <div className="hidden sm:flex items-center gap-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                <Wallet className="h-3 w-3" />
+                SGD {Number(credit).toFixed(2)}
+              </div>
+            )}
+
+            {/* Theme toggle */}
             <button onClick={toggle} title="Toggle theme"
               className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors p-1">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
+
+            {/* Improvement 5: Notification bell */}
+            <div ref={bellRef} className="relative">
+              <button onClick={() => { setBellOpen(o => !o); setUnread(0) }}
+                className="relative text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors p-1">
+                <Bell className="h-4 w-4" />
+                {unread > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    {unread > 9 ? '9+' : unread}
+                  </span>
+                )}
+              </button>
+
+              {bellOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Notifications</span>
+                    {notifications.length > 0 && (
+                      <button onClick={() => setNotifs([])} className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-xs text-slate-400 dark:text-slate-500">No notifications yet</div>
+                  ) : (
+                    <div className="divide-y divide-slate-100 dark:divide-slate-700 max-h-64 overflow-y-auto">
+                      {notifications.map(n => (
+                        <div key={n.id} className="flex items-start gap-2.5 px-4 py-3">
+                          {n.type === 'error'
+                            ? <AlertCircle className="h-3.5 w-3.5 text-red-500 mt-0.5 shrink-0" />
+                            : <CheckCircle2 className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{n.message}</p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                              {n.time.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* User info */}
             <div className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
                 <GraduationCap className="h-3.5 w-3.5 text-green-700 dark:text-green-400" />
@@ -91,6 +190,7 @@ export default function StudentApp() {
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">ID #{student.student_id}</p>
               </div>
             </div>
+
             <button onClick={handleLogout} title="Sign out"
               className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors p-1">
               <LogOut className="h-4 w-4" />
