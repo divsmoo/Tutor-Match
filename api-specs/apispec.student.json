@@ -1,0 +1,946 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Tutor-Match Platform API — Student",
+    "version": "1.0.0",
+    "description": "Consolidated API documentation for the Tutor-Match microservices.\n\nNotes:\n- **Primary gateway**: Kong proxy at `http://localhost:8000`.\n- Some endpoints may be called directly by port during development if Kong routes are not configured yet.\n- The `credit` service exposes **GraphQL** at `/credit/graphql` (via Kong) or `http://localhost:5007/graphql` (direct).\n"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Kong proxy (recommended)"
+    },
+    {
+      "url": "http://localhost:5001",
+      "description": "Tutor service (direct)"
+    },
+    {
+      "url": "http://localhost:5002",
+      "description": "Student service (direct)"
+    },
+    {
+      "url": "http://localhost:5003",
+      "description": "Interest service (direct)"
+    },
+    {
+      "url": "http://localhost:5004",
+      "description": "Trials service (direct)"
+    },
+    {
+      "url": "http://localhost:5006",
+      "description": "Notification service (direct)"
+    },
+    {
+      "url": "http://localhost:5007",
+      "description": "Credit service (direct)"
+    },
+    {
+      "url": "http://localhost:5010",
+      "description": "Indicate Interest (composite, direct)"
+    },
+    {
+      "url": "http://localhost:5011",
+      "description": "Get Interested Students (composite, direct)"
+    },
+    {
+      "url": "http://localhost:5012",
+      "description": "Accept Student (composite, direct)"
+    },
+    {
+      "url": "http://localhost:5013",
+      "description": "Make Trial Booking (composite, direct)"
+    },
+    {
+      "url": "http://localhost:5014",
+      "description": "Continue Lessons (composite, direct)"
+    },
+    {
+      "url": "http://localhost:5015",
+      "description": "Cancel Trial Booking (composite, direct)"
+    },
+    {
+      "url": "http://localhost:5016",
+      "description": "Cancel Trial Lessons (composite, direct)"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Tutor"
+    },
+    {
+      "name": "Student"
+    },
+    {
+      "name": "Interest"
+    },
+    {
+      "name": "Trials"
+    },
+    {
+      "name": "Credit"
+    },
+    {
+      "name": "Indicate Interest (Composite)"
+    },
+    {
+      "name": "Get Interested Students (Composite)"
+    },
+    {
+      "name": "Accept Student (Composite)"
+    },
+    {
+      "name": "Make Trial Booking (Composite)"
+    },
+    {
+      "name": "Continue Lessons (Composite)"
+    },
+    {
+      "name": "Cancel Trial Booking (Composite)"
+    },
+    {
+      "name": "Cancel Trial Lessons (Composite)"
+    },
+    {
+      "name": "Notification"
+    }
+  ],
+  "paths": {
+    "/student": {
+      "get": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Get all students",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Student"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Create student",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Student"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/student/{student_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "student_id",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Get student by ID",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Student"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Update student",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Student"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Delete student",
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "Error": {
+        "description": "Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Health": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "db": {
+            "type": "string",
+            "description": "Present on some services (e.g., trials) to indicate mock/supabase."
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {},
+          "code": {
+            "type": "integer"
+          }
+        }
+      },
+      "Tutor": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Tutor record (shape stored in Supabase).",
+        "properties": {
+          "tutor_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "contact_info": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          }
+        }
+      },
+      "TutorCreate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tutor"
+          }
+        ],
+        "description": "Create tutor (fields are passed through to Supabase)."
+      },
+      "TutorUpdate": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Update tutor (partial fields allowed)."
+      },
+      "Student": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Student record (shape stored in Supabase; typically contains `details` JSON).",
+        "properties": {
+          "student_id": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "StudentCreate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Student"
+          }
+        ],
+        "description": "Create student (fields are passed through to Supabase)."
+      },
+      "StudentUpdate": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Update student (partial fields allowed)."
+      },
+      "Interest": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "interest_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          },
+          "student_id": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACCEPTED",
+              "EXPIRED",
+              "CANCELLED"
+            ]
+          },
+          "created": {
+            "type": "string",
+            "description": "Supabase timestamp field name used by expiry job."
+          }
+        }
+      },
+      "InterestCreate": {
+        "type": "object",
+        "required": [
+          "student_id",
+          "tutor_id"
+        ],
+        "properties": {
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "Trial": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "trial_id": {
+            "type": "integer"
+          },
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          },
+          "trial_date": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "PENDING",
+              "PENDING_PAYMENT",
+              "USER_CANCELLED",
+              "TUTOR_CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "TrialsListResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 200
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Trial"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TrialCreate": {
+        "type": "object",
+        "required": [
+          "student_id",
+          "tutor_id",
+          "trial_date",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          },
+          "trial_date": {
+            "type": "string",
+            "example": "2026-04-06"
+          },
+          "start_time": {
+            "type": "string",
+            "example": "14:00"
+          },
+          "end_time": {
+            "type": "string",
+            "example": "15:00"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "PENDING",
+              "PENDING_PAYMENT",
+              "USER_CANCELLED",
+              "TUTOR_CANCELLED",
+              "COMPLETED"
+            ],
+            "default": "PENDING"
+          }
+        }
+      },
+      "TrialCreateResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 201
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Trial"
+          }
+        }
+      },
+      "TrialStatusUpdate": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "PENDING",
+              "PENDING_PAYMENT",
+              "USER_CANCELLED",
+              "TUTOR_CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "trial_date": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "TrialUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Trial"
+          }
+        }
+      },
+      "GraphQLRequest": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "operationName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "IndicateInterestRequest": {
+        "type": "object",
+        "required": [
+          "student_id",
+          "tutor_id",
+          "student_name"
+        ],
+        "properties": {
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          },
+          "student_name": {
+            "type": "string"
+          }
+        }
+      },
+      "IndicateInterestResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "interest_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "AcceptStudentRequest": {
+        "type": "object",
+        "required": [
+          "interest_id",
+          "proposed_dates",
+          "trial_date",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "interest_id": {
+            "type": "integer"
+          },
+          "proposed_dates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "trial_date": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "AcceptStudentResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "interest_id": {
+            "type": "integer"
+          },
+          "trial": {
+            "$ref": "#/components/schemas/Trial"
+          }
+        }
+      },
+      "InitiatePaymentRequest": {
+        "type": "object",
+        "required": [
+          "student_id",
+          "tutor_id",
+          "trial_id"
+        ],
+        "properties": {
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          },
+          "trial_id": {
+            "type": "integer"
+          },
+          "start_time": {
+            "type": "string",
+            "description": "Optional; used to compute duration for amount."
+          },
+          "end_time": {
+            "type": "string",
+            "description": "Optional; used to compute duration for amount."
+          }
+        }
+      },
+      "InitiatePaymentResponse": {
+        "type": "object",
+        "properties": {
+          "client_secret": {
+            "type": "string"
+          },
+          "payment_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "amount_cents": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string",
+            "example": "sgd"
+          }
+        }
+      },
+      "ConfirmBookingRequest": {
+        "type": "object",
+        "required": [
+          "trial_id",
+          "student_id",
+          "tutor_id",
+          "trial_date",
+          "start_time",
+          "end_time"
+        ],
+        "properties": {
+          "trial_id": {
+            "type": "integer"
+          },
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          },
+          "trial_date": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          },
+          "payment_intent_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ConfirmBookingResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "trial_id": {
+            "type": "integer"
+          },
+          "payment_intent_id": {
+            "type": "string"
+          }
+        }
+      },
+      "MakeTrialBookingLegacyRequest": {
+        "type": "object",
+        "required": [
+          "student_id",
+          "tutor_id",
+          "trial_date",
+          "start_time",
+          "end_time",
+          "trial_id"
+        ],
+        "properties": {
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          },
+          "trial_id": {
+            "type": "integer"
+          },
+          "trial_date": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "string"
+          },
+          "end_time": {
+            "type": "string"
+          }
+        }
+      },
+      "MakeTrialBookingLegacyResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "trial_id": {
+            "type": "integer"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "example": "sgd"
+          }
+        }
+      },
+      "ContinueLessonsRequest": {
+        "type": "object",
+        "required": [
+          "trial_id",
+          "student_id",
+          "tutor_id"
+        ],
+        "properties": {
+          "trial_id": {
+            "type": "integer"
+          },
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "ContinueLessonsResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "tutor": {
+            "type": "object",
+            "properties": {
+              "tutor_id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "contact_info": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CancelTrialBookingRequest": {
+        "type": "object",
+        "required": [
+          "student_id",
+          "tutor_id"
+        ],
+        "properties": {
+          "student_id": {
+            "type": "integer"
+          },
+          "tutor_id": {
+            "type": "integer"
+          },
+          "trial_id": {
+            "type": "integer",
+            "description": "Optional; required only if multiple active trials exist for the pair."
+          }
+        }
+      },
+      "CancelTrialBookingResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "trial": {
+            "$ref": "#/components/schemas/Trial"
+          }
+        }
+      },
+      "CancelTrialLessonsRequest": {
+        "type": "object",
+        "required": [
+          "trial_id"
+        ],
+        "properties": {
+          "trial_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "CancelTrialLessonsResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "example": 200
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "trial": {
+                "$ref": "#/components/schemas/Trial"
+              },
+              "credit_refund": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}
