@@ -7,6 +7,8 @@ import json
 import os
 import uuid
 
+from datetime import datetime
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -21,6 +23,7 @@ STUDENT_SERVICE_URL = "http://student:5002"
 TUTOR_SERVICE_URL   = "http://tutor:5001"
 
 PAYMENT_SERVICE_URL = os.environ.get("PAYMENT_SERVICE_URL", "https://personal-tiwkqptq.outsystemscloud.com/PaymentCore/rest/CreatePaymentAPI/payments")
+CREDIT_SERVICE_URL  = os.environ.get("CREDIT_SERVICE_URL", "http://credit:5007")
 
 
 # ── Helpers ───────────────────────────────────
@@ -56,6 +59,18 @@ def fetch_tutor(tutor_id: int) -> dict:
     if resp.status_code != 200:
         raise ValueError("Failed to fetch tutor details")
     return resp.json().get("data", resp.json())
+
+
+def calc_hours(start_time: str, end_time: str) -> float:
+    """Return duration in hours between two HH:MM:SS or HH:MM strings."""
+    for fmt in ("%H:%M:%S", "%H:%M"):
+        try:
+            s = datetime.strptime(start_time, fmt)
+            e = datetime.strptime(end_time, fmt)
+            return max((e - s).seconds / 3600.0, 0)
+        except ValueError:
+            continue
+    return 1.0  # fallback
 
 
 def fetch_student(student_id: int) -> dict:
@@ -103,12 +118,15 @@ def initiate_payment():
         trial_id = data["trial_id"]
         tutor_id = data["tutor_id"]
 
-        # Fetch tutor rate
+        # Fetch tutor rate and calculate amount from duration in request
         tutor = fetch_tutor(tutor_id)
         tutor_rate = tutor.get("rate")
         if tutor_rate is None:
             return jsonify({"error": "Tutor rate not found"}), 500
-        tutor_rate_cents = int(tutor_rate * 100)
+
+        hours = calc_hours(data.get("start_time", ""), data.get("end_time", ""))
+        total_amount = round(tutor_rate * hours, 2)
+        total_cents  = int(total_amount * 100)
 
         # Mark trial as PENDING_PAYMENT
         update_trial_status(trial_id, "PENDING_PAYMENT")
@@ -116,7 +134,7 @@ def initiate_payment():
         # Create PaymentIntent via OutSystems
         payment_response = requests.post(
             PAYMENT_SERVICE_URL,
-            json={"OrderId": str(uuid.uuid4()), "Amount": tutor_rate_cents, "Currency": "sgd"},
+            json={"OrderId": str(uuid.uuid4()), "Amount": total_cents, "Currency": "sgd"},
             headers={"Content-Type": "application/json"},
         )
 
@@ -139,8 +157,8 @@ def initiate_payment():
         return jsonify({
             "client_secret": client_secret,
             "payment_id":    payment_id,
-            "amount":        tutor_rate,
-            "amount_cents":  tutor_rate_cents,
+            "amount":        total_amount,
+            "amount_cents":  total_cents,
             "currency":      "sgd",
         }), 200
 
@@ -198,6 +216,27 @@ def confirm_booking():
         student_email = student.get("details", {}).get("studentEmail")
         tutor_email   = tutor.get("contact_info")
         tutor_rate    = tutor.get("rate")
+
+        # Deduct credits from student wallet (rate × duration)
+        try:
+            hours = calc_hours(start_time, end_time)
+            total_amount = round(tutor_rate * hours, 2)
+            deduct_mutation = """
+                mutation {
+                    deductCredits(studentId: %d, amount: %f) {
+                        studentId
+                        balance
+                    }
+                }
+            """ % (student_id, total_amount)
+            requests.post(
+                f"{CREDIT_SERVICE_URL}/graphql",
+                json={"query": deduct_mutation},
+                headers={"Content-Type": "application/json"},
+                timeout=5,
+            )
+        except Exception as e:
+            print(f"[make-trial-booking] Credit deduction failed (non-fatal): {e}")
 
         if student_email and tutor_email:
             publish_event("LessonConfirmed", {

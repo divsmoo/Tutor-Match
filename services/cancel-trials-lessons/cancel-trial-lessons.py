@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from datetime import datetime
 import requests
 import pika
 import json
@@ -8,9 +9,10 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-TRIALS_URL = os.environ.get("TRIALS_SERVICE_URL", "http://127.0.0.1:5007")
-CREDIT_URL = os.environ.get("CREDIT_SERVICE_URL", "http://127.0.0.1:5008")
-STUDENT_URL = os.environ.get("STUDENT_SERVICE_URL", "http://127.0.0.1:5002")
+TRIALS_URL  = os.environ.get("TRIALS_SERVICE_URL",  "http://trials:5004")
+CREDIT_URL  = os.environ.get("CREDIT_SERVICE_URL",  "http://credit:5007")
+STUDENT_URL = os.environ.get("STUDENT_SERVICE_URL", "http://student:5002")
+TUTOR_URL   = os.environ.get("TUTOR_SERVICE_URL",   "http://tutor:5001")
 RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "localhost")
 
 
@@ -69,16 +71,36 @@ def cancel_trial():
         trial_data = trial_response.json().get("data", {})
         student_id = trial_data.get("student_id")
 
-        # Step 2 — Refund student credits via GraphQL
+        # Step 2 — Calculate refund amount (rate × duration) and refund credits
         print(f"[cancel_trial_lessons] Refunding credits to student {student_id}")
+        refund_amount = 50.0  # fallback
+        try:
+            start_t = trial_data.get("start_time", "")
+            end_t   = trial_data.get("end_time", "")
+            tutor_id = trial_data.get("tutor_id")
+            tutor_resp = requests.get(f"{TUTOR_URL}/tutor/{tutor_id}", timeout=10)
+            if tutor_resp.status_code == 200:
+                rate = tutor_resp.json().get("data", {}).get("rate", 0)
+                for fmt in ("%H:%M:%S", "%H:%M"):
+                    try:
+                        s = datetime.strptime(start_t, fmt)
+                        e = datetime.strptime(end_t, fmt)
+                        hours = max((e - s).seconds / 3600.0, 0)
+                        refund_amount = round(rate * hours, 2)
+                        break
+                    except ValueError:
+                        continue
+        except Exception as ex:
+            print(f"[cancel_trial_lessons] Could not calculate refund amount, using fallback: {ex}")
+
         credit_mutation = """
             mutation {
-                upsertCredits(studentId: %d, amount: 50) {
+                upsertCredits(studentId: %d, amount: %f) {
                     studentId
                     balance
                 }
             }
-        """ % student_id
+        """ % (student_id, refund_amount)
         credit_response = requests.post(
             f"{CREDIT_URL}/graphql",
             json={"query": credit_mutation},

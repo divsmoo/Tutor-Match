@@ -193,6 +193,7 @@ function CardForm({ trial, tutorName, tutorRate, clientSecret, onClose, onBooked
 // ── Outer modal (manages clientSecret lifecycle) ──────────────
 export default function PaymentModal({ open, onClose, trial, tutorName, tutorRate, onBooked }) {
   const [clientSecret, setClientSecret] = useState(null)
+  const [payAmount, setPayAmount]       = useState(null)
   const [initError, setInitError]       = useState('')
   const [initLoading, setInitLoading]   = useState(false)
 
@@ -200,6 +201,7 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
   useEffect(() => {
     if (!open || !trial) return
     setClientSecret(null)
+    setPayAmount(null)
     setInitError('')
     setInitLoading(true)
 
@@ -207,8 +209,10 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
       student_id: trial.student_id,
       tutor_id:   trial.tutor_id,
       trial_id:   trial.trial_id,
+      start_time: trial.start_time,
+      end_time:   trial.end_time,
     })
-      .then(res => setClientSecret(res.client_secret))
+      .then(res => { setClientSecret(res.client_secret); setPayAmount(res.amount) })
       .catch(err => {
         const msg = err?.response?.data?.error ?? 'Could not initialise payment. Please try again.'
         setInitError(msg)
@@ -255,7 +259,7 @@ export default function PaymentModal({ open, onClose, trial, tutorName, tutorRat
             <CardForm
               trial={trial}
               tutorName={tutorName}
-              tutorRate={tutorRate}
+              tutorRate={payAmount ?? tutorRate}
               clientSecret={clientSecret}
               onClose={handleClose}
               onBooked={onBooked ?? (() => {})}
