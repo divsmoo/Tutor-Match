@@ -4,9 +4,15 @@
 
 TutorMatch is a microservices-based web application that enables students to browse tutors, book trial lessons, handle payments, and manage lesson continuations or cancellations — all in one place.
 
----
+- `tutor_service`
+- `student_service`
+- `interest_service`
+- `trials_service`
 
-## Table of Contents
+Each service:
+- runs as a separate process
+- owns its own database (configure via `dbURL`)
+- exposes REST APIs returning JSON envelopes: `{ "code": <int>, "data": <object>, "message": <string> }`
 
 - [Tech Stack](#tech-stack)
 - [Architecture Overview](#architecture-overview)
